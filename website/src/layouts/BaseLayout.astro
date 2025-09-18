@@ -1,0 +1,55 @@
+---
+const { title = 'Mandari – Aktive Ratsarbeit', description = 'Klüger, schneller, gemeinsam. Das aktive Ratsarbeitssystem.' } = Astro.props as { title?: string, description?: string };
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
+---
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#6b46c1" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="/src/styles/global.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={siteUrl} />
+    <meta property="og:image" content={`${siteUrl}/og.png`} />
+    <script type="application/ld+json">{JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'Mandari',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      offers: { '@type': 'Offer', price: 0, priceCurrency: 'EUR' }
+    })}</script>
+  </head>
+  <body>
+    <header class="site">
+      <div class="container" style="display:flex;align-items:center;gap:1rem;justify-content:space-between">
+        <div class="logo" aria-label="Mandari Startseite">Mandari</div>
+        <nav aria-label="Hauptnavigation">
+          <a href="#features">Features</a>
+          <a href="#zielgruppen" style="margin-left:1rem">Für wen?</a>
+          <a href="#sicherheit" style="margin-left:1rem">Sicherheit</a>
+          <a href="#faq" style="margin-left:1rem">FAQ</a>
+          <a href="#kontakt" class="btn btn-primary" style="margin-left:1rem">Demo anfragen</a>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site">
+      <div class="container" style="display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:center">
+        <div>© {new Date().getFullYear()} Mandari</div>
+        <div style="display:flex;gap:1rem">
+          <a href="/impressum">Impressum</a>
+          <a href="/datenschutz">Datenschutz</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+  </html>

@@ -1,0 +1,149 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Icon from "../components/Icon.astro";
+const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000/api';
+---
+<BaseLayout title="Mandari – Aktive Ratsarbeit" description="Aktive Ratsarbeit. Klüger, schneller, gemeinsam.">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="container" style="display:grid;gap:2rem;grid-template-columns:1.2fr 1fr;align-items:center">
+      <div>
+        <h1 id="hero-title" style="font-size:clamp(2rem,4vw,3rem);margin:.25rem 0 1rem">Aktive Ratsarbeit. Klüger, schneller, gemeinsam.</h1>
+        <p class="muted" style="max-width:60ch">Mandari ist das aktive Ratsarbeitssystem: Analysieren, zusammenarbeiten, und Workflows orchestrieren – statt in Dokumentenfluten zu versinken.</p>
+        <p style="margin-top:1.25rem">
+          <a href="#kontakt" class="btn btn-primary" aria-describedby="cta-desc">Demo anfragen</a>
+        </p>
+        <p id="cta-desc" class="sr-only">Öffnet das Kontaktformular</p>
+      </div>
+      <div role="img" aria-label="Dashboard-Screenshot Platzhalter" class="card" style="min-height:260px">Dashboard-Screenshot (Platzhalter)</div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="problem-title">
+    <div class="container" style="display:grid;gap:1rem">
+      <h2 id="problem-title">Von der Dokumentenflut zur aktiven Arbeit</h2>
+      <p class="muted">Ratsinformationssysteme sind oft unübersichtlich. Mandari wird zum aktiven Werkzeug: intelligente Analyse, Kollaboration, klare Workflows.</p>
+    </div>
+  </section>
+
+  <section id="features" class="section" aria-labelledby="features-title">
+    <div class="container">
+      <h2 id="features-title">Features</h2>
+      <div class="grid grid-3" style="margin-top:1rem">
+        <div class="card"><Icon name="oparl" /> <h3>OParl-Import</h3><p class="muted">Automatischer Import aus RIS per OParl, dedupliziert und durchsuchbar.</p></div>
+        <div class="card"><Icon name="ai" /> <h3>KI-Summaries</h3><p class="muted">Schnellüberblick mit Kontext: Zusammenfassungen, Extrakte, Aufgaben.</p></div>
+        <div class="card"><Icon name="agenda" /> <h3>Personalisierte Tagesordnung</h3><p class="muted">Relevante Punkte, Vorbereitungen und To-dos auf einen Blick.</p></div>
+        <div class="card"><Icon name="editor" /> <h3>Antrags-Editor</h3><p class="muted">Gemeinsam entwerfen, kommentieren, Versionen vergleichen.</p></div>
+        <div class="card"><Icon name="link" /> <h3>Gast-Links</h3><p class="muted">Sicher teilen – zeitlich begrenzt, mit Rechten.</p></div>
+        <div class="card"><Icon name="report" /> <h3>Reports</h3><p class="muted">Kennzahlen, Export, Kalender-Feeds.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="zielgruppen" class="section" aria-labelledby="zielgruppen-title">
+    <div class="container">
+      <h2 id="zielgruppen-title">Für wen?</h2>
+      <div class="grid grid-3" style="margin-top:1rem">
+        <div class="card"><h3>Ratsmitglieder</h3><p class="muted">Vorbereiten, entscheiden, verfolgen.</p></div>
+        <div class="card"><h3>Bezirksvertretungen</h3><p class="muted">Lokale Themen effizient steuern.</p></div>
+        <div class="card"><h3>Sachkundige</h3><p class="muted">Fachlich beitragen, informiert bleiben.</p></div>
+        <div class="card"><h3>Fraktionsbüros</h3><p class="muted">Abläufe koordinieren, Wissen sichern.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sicherheit" class="section" aria-labelledby="sicherheit-title">
+    <div class="container">
+      <h2 id="sicherheit-title">Sicherheit & DSGVO</h2>
+      <div class="grid grid-3" style="margin-top:1rem">
+        <div class="card"><Icon name="shield" /> <h3>Hosting</h3><p class="muted">On-Premises oder Cloud in der EU.</p></div>
+        <div class="card"><Icon name="shield" /> <h3>Verschlüsselung</h3><p class="muted">TLS in Transit, S3-Server-Side-Encryption at Rest.</p></div>
+        <div class="card"><Icon name="roles" /> <h3>Rollen & Rechte</h3><p class="muted">Granulare Zugriffskontrolle, Audit-Logs.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="screenshots-title">
+    <div class="container">
+      <h2 id="screenshots-title">Screenshots</h2>
+      <div class="card" style="min-height:240px">Mockup-Platzhalter</div>
+    </div>
+  </section>
+
+  <section id="faq" class="section" aria-labelledby="faq-title">
+    <div class="container">
+      <h2 id="faq-title">FAQ</h2>
+      <details>
+        <summary>Beschaffung</summary>
+        <p class="muted">Unterstützung bei Verfahren, Vergabearten und Musterausschreibungen.</p>
+      </details>
+      <details>
+        <summary>Schnittstellen</summary>
+        <p class="muted">OParl, Webhooks, CSV/Excel, ICS. API-first.</p>
+      </details>
+      <details>
+        <summary>Schulung</summary>
+        <p class="muted">Onboarding, Rollenhandbuch, Videos.</p>
+      </details>
+    </div>
+  </section>
+
+  <section id="kontakt" class="section" aria-labelledby="kontakt-title">
+    <div class="container" style="display:grid;gap:1rem;max-width:720px">
+      <h2 id="kontakt-title">Kontakt</h2>
+      <form id="lead-form" class="card" style="padding:1.25rem" method="post" action={`${apiBase}/leads/`} novalidate>
+        <div class="grid" style="grid-template-columns:1fr 1fr; gap:1rem">
+          <div>
+            <label for="name">Name</label>
+            <input id="name" name="name" required aria-required="true" />
+          </div>
+          <div>
+            <label for="company">Organisation</label>
+            <input id="company" name="company" />
+          </div>
+          <div style="grid-column: span 2">
+            <label for="email">E-Mail</label>
+            <input id="email" name="email" type="email" required aria-required="true" />
+          </div>
+          <div style="grid-column: span 2">
+            <label for="message">Nachricht</label>
+            <textarea id="message" name="message" rows="4"></textarea>
+          </div>
+          <div style="grid-column: span 2">
+            <label style="display:flex;gap:.5rem;align-items:flex-start">
+              <input type="checkbox" name="consent_privacy" value="true" required aria-required="true" />
+              <span>Ich habe die <a href="/datenschutz" target="_blank" rel="noopener">Datenschutzinformation</a> gelesen und stimme zu.</span>
+            </label>
+            <label style="display:flex;gap:.5rem;align-items:flex-start;margin-top:.5rem">
+              <input type="checkbox" name="consent_marketing" value="true" />
+              <span>Ich möchte Neuigkeiten zu Mandari erhalten (optional).</span>
+            </label>
+          </div>
+          <div style="grid-column: span 2">
+            <button class="btn btn-primary" type="submit">Absenden</button>
+          </div>
+          <div id="form-status" aria-live="polite" class="muted" style="grid-column: span 2"></div>
+        </div>
+      </form>
+      <script>
+        const form = document.getElementById('lead-form');
+        const statusEl = document.getElementById('form-status');
+        form?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          statusEl.textContent = 'Sende…';
+          const formData = new FormData(form);
+          const payload = Object.fromEntries(formData.entries());
+          payload.consent_privacy = !!formData.get('consent_privacy');
+          payload.consent_marketing = !!formData.get('consent_marketing');
+          try {
+            const res = await fetch(form.action, { method:'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!res.ok) throw new Error('Fehler');
+            statusEl.textContent = 'Bitte prüfen Sie Ihre E-Mails zur Bestätigung.';
+            form.reset();
+          } catch (err) {
+            statusEl.textContent = 'Das hat leider nicht geklappt. Bitte später erneut versuchen.';
+          }
+        });
+      </script>
+    </div>
+  </section>
+</BaseLayout>

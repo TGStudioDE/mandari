@@ -1,0 +1,28 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000/api';
+const token = Astro.url.searchParams.get('token');
+---
+<BaseLayout title="Bestätigung – Mandari">
+  <section class="section">
+    <div class="container" style="max-width:720px">
+      <h1>Bestätigung</h1>
+      <p class="muted">Vielen Dank! Wir bestätigen jetzt Ihre Anfrage.</p>
+      <div id="msg" class="card" style="padding:1rem">Wird bestätigt…</div>
+      <script>
+        const base = "${apiBase}";
+        const token = new URLSearchParams(location.search).get('token');
+        const msg = document.getElementById('msg');
+        (async () => {
+          try {
+            const res = await fetch(`${base}/leads/confirm/`, { method:'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) });
+            if (!res.ok) throw new Error('Fehler');
+            msg.textContent = 'Bestätigt. Wir melden uns zeitnah bei Ihnen.';
+          } catch (e) {
+            msg.textContent = 'Bestätigung nicht möglich. Bitte prüfen Sie den Link.';
+          }
+        })();
+      </script>
+    </div>
+  </section>
+</BaseLayout>

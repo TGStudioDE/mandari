@@ -3,11 +3,12 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.response import Response
 
 from rest_framework.decorators import action
-from .models import AgendaItem, Committee, Document, Meeting, Motion, OParlSource, Organization, Person, ShareLink, Team, TeamMembership, Tenant
+from .models import AgendaItem, Committee, Document, Lead, Meeting, Motion, OParlSource, Organization, Person, ShareLink, Team, TeamMembership, Tenant
 from .serializers import (
 	AgendaItemSerializer,
 	CommitteeSerializer,
 	DocumentSerializer,
+	LeadSerializer,
 	MeetingSerializer,
 	MotionSerializer,
     OParlSourceSerializer,
@@ -115,3 +116,45 @@ class OParlSourceViewSet(BaseTenantViewSet):
 		except Exception as e:
 			return Response({"error": str(e)}, status=500)
 
+
+class LeadViewSet(viewsets.ModelViewSet):
+	queryset = Lead.objects.all().order_by("-created_at")
+	serializer_class = LeadSerializer
+	permission_classes = [permissions.AllowAny]
+
+	def create(self, request, *args, **kwargs):
+		# require consent_privacy True
+		if not request.data.get("consent_privacy"):
+			return Response({"detail": "Zustimmung zur Datenschutzerklärung erforderlich."}, status=400)
+		response = super().create(request, *args, **kwargs)
+		# send confirmation mail
+		try:
+			from django.core.mail import send_mail
+			from django.conf import settings
+			confirm_token = response.data.get("confirm_token")
+			frontend_base = getattr(settings, "FRONTEND_BASE_URL", "")
+			confirm_url = f"{frontend_base}/confirm?token={confirm_token}"
+			send_mail(
+				"Bitte bestätigen Sie Ihre Kontaktanfrage",
+				f"Hallo, bitte bestätigen Sie Ihre Anfrage: {confirm_url}",
+				getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@mandari.local"),
+				[response.data.get("email")],
+			)
+		except Exception:
+			pass
+		return response
+
+	@action(detail=False, methods=["post"], url_path="confirm")
+	def confirm(self, request):
+		"""Confirm via token, set confirmed_at."""
+		token = request.data.get("token")
+		if not token:
+			return Response({"detail": "Token fehlt."}, status=400)
+		lead = Lead.objects.filter(confirm_token=token).first()
+		if not lead:
+			return Response({"detail": "Ungültiger Token."}, status=404)
+		if not lead.confirmed_at:
+			from django.utils import timezone
+			lead.confirmed_at = timezone.now()
+			lead.save(update_fields=["confirmed_at", "updated_at"])
+		return Response({"detail": "Bestätigt."})

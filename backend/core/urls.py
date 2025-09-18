@@ -6,6 +6,7 @@ from .views import (
 	AgendaItemViewSet,
 	CommitteeViewSet,
 	DocumentViewSet,
+	LeadViewSet,
 	MeetingViewSet,
 	MotionViewSet,
     OParlSourceViewSet,
@@ -25,6 +26,7 @@ router.register(r"organizations", OrganizationViewSet)
 router.register(r"meetings", MeetingViewSet)
 router.register(r"agenda-items", AgendaItemViewSet)
 router.register(r"documents", DocumentViewSet)
+router.register(r"leads", LeadViewSet, basename="lead")
 router.register(r"motions", MotionViewSet)
 router.register(r"share-links", ShareLinkViewSet)
 router.register(r"teams", TeamViewSet)

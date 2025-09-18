@@ -1,0 +1,19 @@
+---
+const { name } = Astro.props as { name: string };
+const icons: Record<string, string> = {
+  oparl: "M12 2 2 7l10 5 10-5-10-5zm0 8L2 5v12l10 5 10-5V5l-10 5z",
+  ai: "M4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0zm4-1h8v2H8v-2z",
+  agenda: "M6 2h2v2h8V2h2v2h2v16H2V4h2V2h2zm0 6h12v10H6V8z",
+  editor: "M4 16l6 2 10-10-2-2L8 16l-4 0z",
+  link: "M7 12a5 5 0 0 1 5-5h3v2h-3a3 3 0 0 0 0 6h3v2h-3a5 5 0 0 1-5-5zm7-3h3a5 5 0 0 1 0 10h-3v-2h3a3 3 0 0 0 0-6h-3V9z",
+  report: "M5 3h10l4 4v14H5V3zm9 1.5V8h3.5L14 4.5z",
+  shield: "M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z",
+  roles: "M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm7 9v-2a5 5 0 0 0-5-5H10a5 5 0 0 0-5 5v2z",
+};
+---
+<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+  <path d={icons[name] || icons["report"]} />
+  <title class="sr-only">{name}</title>
+  <desc class="sr-only">Icon {name}</desc>
+  <style>:where(title.sr-only, desc.sr-only){position:absolute;left:-9999px}</style>
+</svg>
