@@ -1,0 +1,42 @@
+# General
+.DS_Store
+dist/
+build/
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+node_modules/
+venv/
+.venv/
+.pytest_cache/
+__pycache__/
+*.pyc
+
+# Python
+.mypy_cache/
+.tox/
+.coverage
+coverage.xml
+htmlcov/
+
+# Django
+staticfiles/
+media/
+
+# Env
+.env
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+
+# Docker
+docker-data/
+
+# Local backups
+backup/
+.backup/
+

@@ -1,0 +1,84 @@
+from rest_framework import permissions, status, viewsets
+from rest_framework.response import Response
+
+from .models import AgendaItem, Committee, Document, Meeting, Motion, Organization, Person, ShareLink, Tenant
+from .serializers import (
+	AgendaItemSerializer,
+	CommitteeSerializer,
+	DocumentSerializer,
+	MeetingSerializer,
+	MotionSerializer,
+	OrganizationSerializer,
+	PersonSerializer,
+	ShareLinkSerializer,
+	TenantSerializer,
+)
+
+
+class BaseTenantViewSet(viewsets.ModelViewSet):
+	permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+	def get_queryset(self):
+		qs = super().get_queryset()
+		tenant_id = self.request.query_params.get("tenant")
+		if tenant_id:
+			qs = qs.filter(tenant_id=tenant_id)
+		return qs
+
+
+class TenantViewSet(viewsets.ModelViewSet):
+	queryset = Tenant.objects.all()
+	serializer_class = TenantSerializer
+	permission_classes = [permissions.IsAdminUser]
+
+
+class CommitteeViewSet(BaseTenantViewSet):
+	queryset = Committee.objects.all()
+	serializer_class = CommitteeSerializer
+
+
+class PersonViewSet(BaseTenantViewSet):
+	queryset = Person.objects.all()
+	serializer_class = PersonSerializer
+
+
+class OrganizationViewSet(BaseTenantViewSet):
+	queryset = Organization.objects.all()
+	serializer_class = OrganizationSerializer
+
+
+class MeetingViewSet(BaseTenantViewSet):
+	queryset = Meeting.objects.all().select_related("committee")
+	serializer_class = MeetingSerializer
+
+
+class AgendaItemViewSet(BaseTenantViewSet):
+	queryset = AgendaItem.objects.all().select_related("meeting")
+	serializer_class = AgendaItemSerializer
+
+
+class DocumentViewSet(BaseTenantViewSet):
+	queryset = Document.objects.all().select_related("agenda_item")
+	serializer_class = DocumentSerializer
+
+	def create(self, request, *args, **kwargs):
+		content_hash = request.data.get("content_hash")
+		tenant_id = request.data.get("tenant")
+		if content_hash and tenant_id:
+			existing = Document.objects.filter(tenant_id=tenant_id, content_hash=content_hash).first()
+			if existing:
+				ser = self.get_serializer(existing)
+				return Response(ser.data, status=status.HTTP_200_OK)
+		return super().create(request, *args, **kwargs)
+
+
+class MotionViewSet(BaseTenantViewSet):
+	queryset = Motion.objects.all().select_related("author")
+	serializer_class = MotionSerializer
+
+
+class ShareLinkViewSet(viewsets.ModelViewSet):
+	queryset = ShareLink.objects.all().select_related("motion")
+	serializer_class = ShareLinkSerializer
+	permission_classes = [permissions.AllowAny]
+
