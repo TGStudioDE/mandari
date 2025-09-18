@@ -8,9 +8,12 @@ from .views import (
 	DocumentViewSet,
 	MeetingViewSet,
 	MotionViewSet,
+    OParlSourceViewSet,
 	OrganizationViewSet,
 	PersonViewSet,
 	ShareLinkViewSet,
+    TeamMembershipViewSet,
+    TeamViewSet,
 	TenantViewSet,
 )
 
@@ -24,6 +27,9 @@ router.register(r"agenda-items", AgendaItemViewSet)
 router.register(r"documents", DocumentViewSet)
 router.register(r"motions", MotionViewSet)
 router.register(r"share-links", ShareLinkViewSet)
+router.register(r"teams", TeamViewSet)
+router.register(r"team-memberships", TeamMembershipViewSet)
+router.register(r"oparl-sources", OParlSourceViewSet)
 
 urlpatterns = [
 	path("", include(router.urls)),

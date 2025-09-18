@@ -49,3 +49,6 @@ ingest-run:
 ai-run:
 	$(COMPOSE) exec ai uvicorn app.main:app --reload --host 0.0.0.0 --port 8002
 
+test:
+	$(COMPOSE) exec backend pytest -q | cat
+

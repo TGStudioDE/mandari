@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import AgendaItem, Committee, Document, Meeting, Motion, Organization, Person, ShareLink, Tenant
+from .models import AgendaItem, Committee, Document, Meeting, Motion, OParlSource, Organization, Person, ShareLink, Team, TeamMembership, Tenant
 
 
 class TenantSerializer(serializers.ModelSerializer):
@@ -68,4 +68,22 @@ class ShareLinkSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = ShareLink
 		fields = ["id", "motion", "token", "expires_at", "can_edit"]
+
+
+class TeamSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Team
+		fields = ["id", "tenant", "name", "slug"]
+
+
+class TeamMembershipSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = TeamMembership
+		fields = ["id", "team", "user", "role"]
+
+
+class OParlSourceSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = OParlSource
+		fields = ["id", "tenant", "root_url", "enabled", "last_synced_at", "etag", "last_modified"]
 

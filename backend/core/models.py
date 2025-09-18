@@ -28,6 +28,27 @@ class User(AbstractUser):
 	)
 
 
+class Team(models.Model):
+	tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
+	name = models.CharField(max_length=200)
+	slug = models.SlugField()
+
+	class Meta:
+		unique_together = ("tenant", "slug")
+
+	def __str__(self) -> str:
+		return f"{self.tenant.slug}:{self.slug}"
+
+
+class TeamMembership(models.Model):
+	team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="memberships")
+	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="team_memberships")
+	role = models.CharField(max_length=50, default="member")
+
+	class Meta:
+		unique_together = ("team", "user")
+
+
 class Organization(models.Model):
 	tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
 	name = models.CharField(max_length=255)
@@ -132,4 +153,16 @@ class Notification(models.Model):
 	payload = models.JSONField(default=dict)
 	is_sent = models.BooleanField(default=False)
 	created_at = models.DateTimeField(auto_now_add=True)
+
+
+class OParlSource(models.Model):
+	tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
+	root_url = models.URLField()
+	enabled = models.BooleanField(default=True)
+	last_synced_at = models.DateTimeField(null=True, blank=True)
+	etag = models.CharField(max_length=128, blank=True, default="")
+	last_modified = models.CharField(max_length=128, blank=True, default="")
+
+	class Meta:
+		unique_together = ("tenant", "root_url")
 
