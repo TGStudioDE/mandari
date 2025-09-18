@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: Mandari API (MVP)
+  version: 0.1.0
+paths:
+  /api/tenants/:
+    get:
+      summary: List tenants
+      responses:
+        '200': {description: OK}
+  /api/committees/:
+    get:
+      summary: List committees
+      responses:
+        '200': {description: OK}
+  /api/meetings/:
+    get:
+      summary: List meetings
+      responses:
+        '200': {description: OK}
+  /api/documents/:
+    post:
+      summary: Create document
+      responses:
+        '201': {description: Created}
+  /api/motions/:
+    get:
+      summary: List motions
+      responses:
+        '200': {description: OK}
+

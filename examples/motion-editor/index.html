@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Mandari Motion Editor (Demo)</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 20px; }
+      textarea { width: 100%; height: 200px; }
+      input, button { padding: 8px; }
+    </style>
+  </head>
+  <body>
+    <h1>Motion Editor</h1>
+    <label>Titel</label><br />
+    <input id="title" value="Beispielantrag" /><br /><br />
+    <label>JSON-Inhalt</label><br />
+    <textarea id="content">{"ops":[{"insert":"Textbaustein"}]}</textarea><br />
+    <button id="save">Speichern</button>
+    <pre id="out"></pre>
+    <script>
+      document.getElementById('save').onclick = async () => {
+        const payload = {
+          tenant: 1,
+          author: 1,
+          title: document.getElementById('title').value,
+          status: 'draft',
+          content: JSON.parse(document.getElementById('content').value)
+        };
+        const r = await fetch('http://localhost:8000/api/motions/', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        document.getElementById('out').textContent = await r.text();
+      };
+    </script>
+  </body>
+  </html>
+

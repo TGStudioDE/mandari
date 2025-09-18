@@ -1,0 +1,10 @@
+fastapi==0.115.0
+uvicorn==0.30.6
+httpx==0.27.2
+psycopg2-binary==2.9.9
+python-magic==0.4.27
+pdfminer.six==20231228
+pytesseract==0.3.13
+Pillow==10.4.0
+python-dotenv==1.0.1
+
