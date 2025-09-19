@@ -12,31 +12,58 @@ class TenantSerializer(serializers.ModelSerializer):
 class CommitteeSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Committee
-		fields = ["id", "tenant", "name", "oparl_id", "organization"]
+        fields = [
+            "id",
+            "tenant",
+            "name",
+            "oparl_id",
+            "organization",
+            "source_base",
+            "raw",
+        ]
 
 
 class PersonSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Person
-		fields = ["id", "tenant", "name", "party", "oparl_id"]
+        fields = ["id", "tenant", "name", "party", "oparl_id", "source_base", "raw"]
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Organization
-		fields = ["id", "tenant", "name", "oparl_id"]
+        fields = ["id", "tenant", "name", "oparl_id", "source_base", "raw"]
 
 
 class MeetingSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Meeting
-		fields = ["id", "tenant", "committee", "start", "end", "oparl_id"]
+        fields = [
+            "id",
+            "tenant",
+            "committee",
+            "start",
+            "end",
+            "oparl_id",
+            "source_base",
+            "raw",
+        ]
 
 
 class AgendaItemSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = AgendaItem
-		fields = ["id", "tenant", "meeting", "position", "title", "category", "oparl_id"]
+        fields = [
+            "id",
+            "tenant",
+            "meeting",
+            "position",
+            "title",
+            "category",
+            "oparl_id",
+            "source_base",
+            "raw",
+        ]
 
 
 class DocumentSerializer(serializers.ModelSerializer):
@@ -53,6 +80,8 @@ class DocumentSerializer(serializers.ModelSerializer):
 			"content_text",
 			"content_hash",
 			"oparl_id",
+            "source_base",
+            "mimetype",
 			"created_at",
 			"updated_at",
 		]
@@ -85,5 +114,32 @@ class TeamMembershipSerializer(serializers.ModelSerializer):
 class OParlSourceSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = OParlSource
-		fields = ["id", "tenant", "root_url", "enabled", "last_synced_at", "etag", "last_modified"]
+        fields = [
+            "id",
+            "tenant",
+            "team",
+            "root_url",
+            "enabled",
+            "last_synced_at",
+            "etag",
+            "last_modified",
+            "auth_type",
+            "api_key_header",
+            "api_key_value",
+            "username",
+            "password",
+            "requests_per_minute",
+            "max_parallel_requests",
+            "request_timeout_seconds",
+            "max_retries",
+            "include_body",
+            "include_person",
+            "include_organization",
+            "include_meeting",
+            "include_agenda_item",
+            "include_paper",
+            "include_file",
+            "cron",
+            "frequency_seconds",
+        ]
 

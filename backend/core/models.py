@@ -53,6 +53,8 @@ class Organization(models.Model):
 	tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
 	name = models.CharField(max_length=255)
 	oparl_id = models.CharField(max_length=255, blank=True, default="")
+    source_base = models.CharField(max_length=255, blank=True, default="", db_index=True)
+    raw = models.JSONField(default=dict)
 
 	def __str__(self) -> str:
 		return self.name
@@ -63,6 +65,8 @@ class Committee(models.Model):
 	name = models.CharField(max_length=255)
 	oparl_id = models.CharField(max_length=255, blank=True, default="")
 	organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, blank=True)
+    source_base = models.CharField(max_length=255, blank=True, default="", db_index=True)
+    raw = models.JSONField(default=dict)
 
 	def __str__(self) -> str:
 		return self.name
@@ -73,6 +77,8 @@ class Person(models.Model):
 	name = models.CharField(max_length=255)
 	party = models.CharField(max_length=255, blank=True, default="")
 	oparl_id = models.CharField(max_length=255, blank=True, default="")
+    source_base = models.CharField(max_length=255, blank=True, default="", db_index=True)
+    raw = models.JSONField(default=dict)
 
 	def __str__(self) -> str:
 		return self.name
@@ -84,6 +90,8 @@ class Meeting(models.Model):
 	start = models.DateTimeField()
 	end = models.DateTimeField(null=True, blank=True)
 	oparl_id = models.CharField(max_length=255, blank=True, default="")
+    source_base = models.CharField(max_length=255, blank=True, default="", db_index=True)
+    raw = models.JSONField(default=dict)
 
 
 class AgendaItem(models.Model):
@@ -93,6 +101,8 @@ class AgendaItem(models.Model):
 	title = models.CharField(max_length=500)
 	category = models.CharField(max_length=100, blank=True, default="")
 	oparl_id = models.CharField(max_length=255, blank=True, default="")
+    source_base = models.CharField(max_length=255, blank=True, default="", db_index=True)
+    raw = models.JSONField(default=dict)
 
 	class Meta:
 		unique_together = ("meeting", "position")
@@ -109,6 +119,8 @@ class Document(models.Model):
 	content_text = models.TextField(blank=True, default="")
 	content_hash = models.CharField(max_length=64, db_index=True)
 	oparl_id = models.CharField(max_length=255, blank=True, default="")
+    source_base = models.CharField(max_length=255, blank=True, default="", db_index=True)
+    mimetype = models.CharField(max_length=100, blank=True, default="")
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -162,6 +174,34 @@ class OParlSource(models.Model):
 	last_synced_at = models.DateTimeField(null=True, blank=True)
 	etag = models.CharField(max_length=128, blank=True, default="")
 	last_modified = models.CharField(max_length=128, blank=True, default="")
+    # Optional Zuordnung zu Team
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True, blank=True)
+    # Auth-Konfiguration
+    auth_type = models.CharField(
+        max_length=20,
+        choices=[("none", "None"), ("api_key", "API Key"), ("basic", "Basic Auth")],
+        default="none",
+    )
+    api_key_header = models.CharField(max_length=100, blank=True, default="Authorization")
+    api_key_value = models.CharField(max_length=500, blank=True, default="")
+    username = models.CharField(max_length=200, blank=True, default="")
+    password = models.CharField(max_length=200, blank=True, default="")
+    # Rate-Limit / Retry
+    requests_per_minute = models.PositiveIntegerField(default=60)
+    max_parallel_requests = models.PositiveIntegerField(default=4)
+    request_timeout_seconds = models.PositiveIntegerField(default=30)
+    max_retries = models.PositiveIntegerField(default=3)
+    # Datenbreite (welche Ressourcen)
+    include_body = models.BooleanField(default=True)
+    include_person = models.BooleanField(default=True)
+    include_organization = models.BooleanField(default=True)
+    include_meeting = models.BooleanField(default=True)
+    include_agenda_item = models.BooleanField(default=True)
+    include_paper = models.BooleanField(default=True)
+    include_file = models.BooleanField(default=True)
+    # Scheduling
+    cron = models.CharField(max_length=100, blank=True, default="")  # alternativ frequency
+    frequency_seconds = models.PositiveIntegerField(default=0)  # 0 = deaktiviert, wenn cron gesetzt
 
 	class Meta:
 		unique_together = ("tenant", "root_url")
