@@ -3,7 +3,7 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.response import Response
 
 from rest_framework.decorators import action
-from .models import AgendaItem, Committee, Document, Meeting, Motion, OParlSource, Organization, Person, ShareLink, Team, TeamMembership, Tenant
+from .models import AgendaItem, Committee, Document, Meeting, Motion, OParlSource, Organization, Person, ShareLink, Team, TeamMembership, Tenant, AIModelRegistry, AIProviderConfig, AIAllowedModel, AIPolicy, AIFeatureFlag, AIUsageLog
 from .serializers import (
 	AgendaItemSerializer,
 	CommitteeSerializer,
@@ -17,6 +17,12 @@ from .serializers import (
     TeamMembershipSerializer,
     TeamSerializer,
 	TenantSerializer,
+    AIModelRegistrySerializer,
+    AIProviderConfigSerializer,
+    AIAllowedModelSerializer,
+    AIPolicySerializer,
+    AIFeatureFlagSerializer,
+    AIUsageLogSerializer,
 )
 
 
@@ -115,3 +121,49 @@ class OParlSourceViewSet(BaseTenantViewSet):
 		except Exception as e:
 			return Response({"error": str(e)}, status=500)
 
+
+class AIModelRegistryViewSet(viewsets.ModelViewSet):
+	queryset = AIModelRegistry.objects.all()
+	serializer_class = AIModelRegistrySerializer
+	permission_classes = [permissions.IsAdminUser]
+
+
+class AIProviderConfigViewSet(BaseTenantViewSet):
+	queryset = AIProviderConfig.objects.all()
+	serializer_class = AIProviderConfigSerializer
+	permission_classes = [permissions.IsAdminUser]
+
+	@action(detail=True, methods=["post"], url_path="test-call")
+	def test_call(self, request, pk=None):
+		# Stub: führt einen No-PII Testprompt gegen konfigurierten Provider aus
+		config = self.get_object()
+		try:
+			from core.ai.runtime import perform_test_call
+			result = perform_test_call(config)
+			return Response({"ok": True, "result": result})
+		except Exception as e:
+			return Response({"ok": False, "error": str(e)}, status=500)
+
+
+class AIAllowedModelViewSet(BaseTenantViewSet):
+	queryset = AIAllowedModel.objects.all()
+	serializer_class = AIAllowedModelSerializer
+	permission_classes = [permissions.IsAdminUser]
+
+
+class AIPolicyViewSet(BaseTenantViewSet):
+	queryset = AIPolicy.objects.all()
+	serializer_class = AIPolicySerializer
+	permission_classes = [permissions.IsAdminUser]
+
+
+class AIFeatureFlagViewSet(BaseTenantViewSet):
+	queryset = AIFeatureFlag.objects.all()
+	serializer_class = AIFeatureFlagSerializer
+	permission_classes = [permissions.IsAdminUser]
+
+
+class AIUsageLogViewSet(BaseTenantViewSet):
+	queryset = AIUsageLog.objects.all()
+	serializer_class = AIUsageLogSerializer
+	permission_classes = [permissions.IsAdminUser]

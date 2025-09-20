@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from .ai.api import DiffExplainView, EmbeddingsView, KeywordsView, SummarizeView, RerankView
 from .views import (
 	AgendaItemViewSet,
 	CommitteeViewSet,
@@ -15,6 +16,12 @@ from .views import (
     TeamMembershipViewSet,
     TeamViewSet,
 	TenantViewSet,
+    AIModelRegistryViewSet,
+    AIProviderConfigViewSet,
+    AIAllowedModelViewSet,
+    AIPolicyViewSet,
+    AIFeatureFlagViewSet,
+    AIUsageLogViewSet,
 )
 
 router = DefaultRouter()
@@ -30,6 +37,12 @@ router.register(r"share-links", ShareLinkViewSet)
 router.register(r"teams", TeamViewSet)
 router.register(r"team-memberships", TeamMembershipViewSet)
 router.register(r"oparl-sources", OParlSourceViewSet)
+router.register(r"ai/model-registry", AIModelRegistryViewSet)
+router.register(r"ai/provider-configs", AIProviderConfigViewSet)
+router.register(r"ai/allowed-models", AIAllowedModelViewSet)
+router.register(r"ai/policies", AIPolicyViewSet)
+router.register(r"ai/feature-flags", AIFeatureFlagViewSet)
+router.register(r"ai/usage-logs", AIUsageLogViewSet)
 
 urlpatterns = [
 	path("", include(router.urls)),
@@ -43,5 +56,11 @@ urlpatterns = [
         ),
         name="tenant-ics",
     ),
+    # AI Use-Case Endpunkte
+    path("ai/summarize", SummarizeView.as_view()),
+    path("ai/keywords", KeywordsView.as_view()),
+    path("ai/embeddings", EmbeddingsView.as_view()),
+    path("ai/diff-explain", DiffExplainView.as_view()),
+    path("ai/rerank", RerankView.as_view()),
 ]
 

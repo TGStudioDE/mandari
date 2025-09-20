@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import AgendaItem, Committee, Document, Meeting, Motion, OParlSource, Organization, Person, ShareLink, Team, TeamMembership, Tenant
+from .models import AgendaItem, Committee, Document, Meeting, Motion, OParlSource, Organization, Person, ShareLink, Team, TeamMembership, Tenant, AIModelRegistry, AIProviderConfig, AIAllowedModel, AIPolicy, AIFeatureFlag, AIUsageLog
 
 
 class TenantSerializer(serializers.ModelSerializer):
@@ -86,4 +86,97 @@ class OParlSourceSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = OParlSource
 		fields = ["id", "tenant", "root_url", "enabled", "last_synced_at", "etag", "last_modified"]
+
+
+class AIModelRegistrySerializer(serializers.ModelSerializer):
+	class Meta:
+		model = AIModelRegistry
+		fields = [
+			"id",
+			"name",
+			"provider",
+			"capability",
+			"max_input_tokens",
+			"max_output_tokens",
+			"cost_prompt_mtokens",
+			"cost_completion_mtokens",
+			"metadata",
+			"is_default",
+		]
+
+
+class AIProviderConfigSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = AIProviderConfig
+		fields = [
+			"id",
+			"tenant",
+			"team",
+			"provider",
+			"api_key",
+			"base_url",
+			"region",
+			"eu_only",
+			"enabled",
+			"monthly_budget_cents",
+			"daily_token_limit",
+			"rpm_limit",
+			"tpm_limit",
+			"created_at",
+			"updated_at",
+		]
+
+
+class AIAllowedModelSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = AIAllowedModel
+		fields = ["id", "team", "model", "enabled"]
+
+
+class AIPolicySerializer(serializers.ModelSerializer):
+	class Meta:
+		model = AIPolicy
+		fields = [
+			"id",
+			"tenant",
+			"team",
+			"pii_masking_enabled",
+			"anonymize_before_send",
+			"chunk_size",
+			"allow_external_transfer",
+			"logging_opt_in",
+			"created_at",
+			"updated_at",
+		]
+
+
+class AIFeatureFlagSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = AIFeatureFlag
+		fields = ["id", "team", "name", "enabled"]
+
+
+class AIUsageLogSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = AIUsageLog
+		fields = [
+			"id",
+			"tenant",
+			"team",
+			"user",
+			"provider",
+			"model",
+			"use_case",
+			"request_chars",
+			"request_preview",
+			"response_chars",
+			"response_preview",
+			"prompt_tokens",
+			"completion_tokens",
+			"cost_cents",
+			"success",
+			"status_code",
+			"metadata",
+			"created_at",
+		]
 
