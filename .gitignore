@@ -1,5 +1,6 @@
 # General
 .DS_Store
+Thumbs.db
 dist/
 build/
 *.log
@@ -18,16 +19,28 @@ __pycache__/
 .mypy_cache/
 .tox/
 .coverage
+.coverage.*
 coverage.xml
 htmlcov/
 
 # Django
 staticfiles/
 media/
+db.sqlite3
+*.sqlite*
 
 # Env
 .env
 .env.*.local
+.env.local
+.env.*
+!**/.env.example
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+*.cert
 
 # IDE
 .idea/
@@ -39,4 +52,7 @@ docker-data/
 # Local backups
 backup/
 .backup/
+
+# Astro cache
+**/.astro/
 

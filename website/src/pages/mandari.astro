@@ -1,0 +1,489 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Icon from "../components/Icon.astro";
+const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000/api';
+---
+<BaseLayout title="Mandari – Das moderne Ratsarbeitssystem" description="Mandari verwandelt traditionelle Ratsinformationssysteme in aktive Arbeitsumgebungen. Intelligente Analyse, Kollaboration und Workflows für moderne Kommunalpolitik.">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <div class="product-badge">Produkt</div>
+          <h1>Mandari</h1>
+          <p class="hero-subtitle">Das Ratsarbeitssystem (RAS) – von der Dokumentenflut zur aktiven Arbeit</p>
+          <div class="hero-actions">
+            <a href="#kontakt" class="btn btn-primary">Demo anfragen</a>
+            <a href="#features" class="btn btn-secondary">Features entdecken</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="dashboard-preview">
+            <div class="preview-header">
+              <div class="preview-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <span class="preview-title">Mandari Dashboard</span>
+            </div>
+            <div class="preview-content">
+              <div class="preview-sidebar">
+                <div class="sidebar-item active">Dashboard</div>
+                <div class="sidebar-item">Tagesordnung</div>
+                <div class="sidebar-item">Dokumente</div>
+                <div class="sidebar-item">Anträge</div>
+              </div>
+              <div class="preview-main">
+                <div class="preview-card">
+                  <h4>Heutige Sitzung</h4>
+                  <p>3 Anträge, 2 Dokumente</p>
+                </div>
+                <div class="preview-card">
+                  <h4>KI-Zusammenfassung</h4>
+                  <p>Wichtige Punkte identifiziert</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="section problem-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Das Problem mit traditionellen RIS</h2>
+        <p class="section-subtitle">Ratsinformationssysteme sind oft unübersichtlich und passiv</p>
+      </div>
+      <div class="problem-grid">
+        <div class="problem-item">
+          <Icon name="document" />
+          <h3>Dokumentenflut</h3>
+          <p>Hunderte von PDFs, unstrukturierte Informationen, schwer durchsuchbar</p>
+        </div>
+        <div class="problem-item">
+          <Icon name="time" />
+          <h3>Zeitaufwand</h3>
+          <p>Stundenlange Vorbereitung, manuelle Recherche, verpasste Zusammenhänge</p>
+        </div>
+        <div class="problem-item">
+          <Icon name="collaboration" />
+          <h3>Isolierte Arbeit</h3>
+          <p>Keine Kollaboration, keine Kommentare, keine gemeinsame Vorbereitung</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Solution Section -->
+  <section class="section solution-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Die Mandari-Lösung</h2>
+        <p class="section-subtitle">Aktive Ratsarbeit mit moderner Technologie</p>
+      </div>
+      <div class="solution-content">
+        <div class="solution-text">
+          <h3>Von RIS zu RAS</h3>
+          <p>Mandari verwandelt traditionelle Ratsinformationssysteme (RIS) in aktive Ratsarbeitssysteme (RAS). Statt passiv Informationen zu verwalten, wird Mandari zum aktiven Werkzeug für intelligente Analyse, Kollaboration und klare Workflows.</p>
+          <ul class="solution-benefits">
+            <li>KI-gestützte Zusammenfassungen und Analysen</li>
+            <li>Kollaborative Antragserstellung und -bearbeitung</li>
+            <li>Personalisierte Tagesordnungen und To-dos</li>
+            <li>Intelligente Suche und Kategorisierung</li>
+          </ul>
+        </div>
+        <div class="solution-visual">
+          <div class="transformation-diagram">
+            <div class="before">
+              <h4>Vorher (RIS)</h4>
+              <div class="documents">
+                <div class="doc">PDF 1</div>
+                <div class="doc">PDF 2</div>
+                <div class="doc">PDF 3</div>
+                <div class="doc">...</div>
+              </div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="after">
+              <h4>Nachher (RAS)</h4>
+              <div class="active-features">
+                <div class="feature">KI-Analyse</div>
+                <div class="feature">Kollaboration</div>
+                <div class="feature">Workflows</div>
+                <div class="feature">Dashboard</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="section features-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Features</h2>
+        <p class="section-subtitle">Alles was moderne Ratsarbeit braucht</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <Icon name="oparl" />
+          <h3>OParl-Import</h3>
+          <p>Automatischer Import aus RIS per OParl-Standard, dedupliziert und durchsuchbar</p>
+        </div>
+        <div class="feature-card">
+          <Icon name="ai" />
+          <h3>KI-Summaries</h3>
+          <p>Schnellüberblick mit Kontext: Zusammenfassungen, Extrakte, Aufgaben und Empfehlungen</p>
+        </div>
+        <div class="feature-card">
+          <Icon name="agenda" />
+          <h3>Personalisierte Tagesordnung</h3>
+          <p>Relevante Punkte, Vorbereitungen und To-dos auf einen Blick</p>
+        </div>
+        <div class="feature-card">
+          <Icon name="editor" />
+          <h3>Antrags-Editor</h3>
+          <p>Gemeinsam entwerfen, kommentieren, Versionen vergleichen und verwalten</p>
+        </div>
+        <div class="feature-card">
+          <Icon name="link" />
+          <h3>Gast-Links</h3>
+          <p>Sicher teilen – zeitlich begrenzt, mit granularen Rechten und Audit-Log</p>
+        </div>
+        <div class="feature-card">
+          <Icon name="report" />
+          <h3>Reports & Analytics</h3>
+          <p>Kennzahlen, Export-Funktionen, Kalender-Feeds und Performance-Metriken</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Target Groups Section -->
+  <section class="section target-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Für wen ist Mandari?</h2>
+        <p class="section-subtitle">Alle Akteure der Kommunalpolitik profitieren</p>
+      </div>
+      <div class="target-grid">
+        <div class="target-card">
+          <Icon name="user" />
+          <h3>Ratsmitglieder</h3>
+          <p>Vorbereiten, entscheiden, verfolgen – mit allen relevanten Informationen im Überblick</p>
+        </div>
+        <div class="target-card">
+          <Icon name="building" />
+          <h3>Bezirksvertretungen</h3>
+          <p>Lokale Themen effizient steuern und mit der Hauptverwaltung koordinieren</p>
+        </div>
+        <div class="target-card">
+          <Icon name="expert" />
+          <h3>Sachkundige Bürger</h3>
+          <p>Fachlich beitragen, informiert bleiben und konstruktiv mitwirken</p>
+        </div>
+        <div class="target-card">
+          <Icon name="office" />
+          <h3>Fraktionsbüros</h3>
+          <p>Abläufe koordinieren, Wissen sichern und interne Prozesse optimieren</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Security Section -->
+  <section class="section security-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Sicherheit & DSGVO</h2>
+        <p class="section-subtitle">Höchste Standards für sensible Verwaltungsdaten</p>
+      </div>
+      <div class="security-grid">
+        <div class="security-card">
+          <Icon name="shield" />
+          <h3>Hosting</h3>
+          <p>On-Premises oder Cloud in der EU – Sie entscheiden über den Standort Ihrer Daten</p>
+        </div>
+        <div class="security-card">
+          <Icon name="lock" />
+          <h3>Verschlüsselung</h3>
+          <p>TLS in Transit, S3-Server-Side-Encryption at Rest – Ende-zu-Ende geschützt</p>
+        </div>
+        <div class="security-card">
+          <Icon name="roles" />
+          <h3>Rollen & Rechte</h3>
+          <p>Granulare Zugriffskontrolle, Audit-Logs und DSGVO-konforme Datenverarbeitung</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section id="kontakt" class="section cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Bereit für moderne Ratsarbeit?</h2>
+        <p>Lassen Sie uns Mandari gemeinsam entwickeln und Ihre Verwaltung digitalisieren.</p>
+        <div class="cta-actions">
+          <a href="/kontakt" class="btn btn-primary">Demo anfragen</a>
+          <a href="/faq" class="btn btn-secondary">FAQ lesen</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .product-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+
+  .dashboard-preview {
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    color: #333;
+  }
+
+  .preview-header {
+    background: #f8f9fa;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .preview-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .preview-dots span {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #dee2e6;
+  }
+
+  .preview-dots span:first-child { background: #ff5f57; }
+  .preview-dots span:nth-child(2) { background: #ffbd2e; }
+  .preview-dots span:nth-child(3) { background: #28ca42; }
+
+  .preview-content {
+    display: flex;
+    min-height: 300px;
+  }
+
+  .preview-sidebar {
+    width: 200px;
+    background: #f8f9fa;
+    padding: 1rem;
+  }
+
+  .sidebar-item {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+  }
+
+  .sidebar-item.active {
+    background: #667eea;
+    color: white;
+  }
+
+  .preview-main {
+    flex: 1;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .preview-card {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  .problem-section {
+    background: #f8f9fa;
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .problem-item {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .solution-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    margin-top: 2rem;
+  }
+
+  .solution-benefits {
+    list-style: none;
+    padding: 0;
+  }
+
+  .solution-benefits li {
+    padding: 0.5rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+  }
+
+  .solution-benefits li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #28ca42;
+    font-weight: bold;
+  }
+
+  .transformation-diagram {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .before, .after {
+    flex: 1;
+    text-align: center;
+  }
+
+  .documents, .active-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .doc, .feature {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: #f8f9fa;
+  }
+
+  .feature {
+    background: #e3f2fd;
+    color: #1976d2;
+  }
+
+  .arrow {
+    font-size: 2rem;
+    color: #667eea;
+    font-weight: bold;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .feature-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: transform 0.2s ease;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .target-section {
+    background: #f8f9fa;
+  }
+
+  .target-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .target-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    text-align: center;
+  }
+
+  .security-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .security-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    text-align: center;
+  }
+
+  .cta-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .cta-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .solution-content {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .transformation-diagram {
+      flex-direction: column;
+    }
+
+    .arrow {
+      transform: rotate(90deg);
+    }
+
+    .cta-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+</style>
