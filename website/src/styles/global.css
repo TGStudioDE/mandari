@@ -22,6 +22,19 @@
   --border-radius: 0.5rem;
   --border-radius-lg: 1rem;
   --transition: all 0.2s ease;
+  /* Layout tokens */
+  --container: 1200px;
+  --container-wide: 1360px;
+  /* Spacing scale */
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+  --space-10: 4rem;
+  --space-12: 5rem;
 }
 
 * {
@@ -97,13 +110,17 @@ img {
 
 /* Layout */
 .container { 
-  max-width: 1200px; 
+  max-width: var(--container); 
   margin: 0 auto; 
   padding: 0 1.5rem; 
 }
 
+.container-wide {
+  max-width: var(--container-wide);
+}
+
 .section { 
-  padding: 5rem 0; 
+  padding: var(--space-12) 0; 
 }
 
 .section-header {
@@ -205,6 +222,22 @@ img {
   flex-wrap: wrap;
 }
 
+/* Trust strip */
+.trust-strip {
+  background: var(--bg-light);
+  color: var(--text-muted);
+}
+
+.trust-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: center;
+  text-align: center;
+  padding: 1rem 0;
+  font-weight: 600;
+}
+
 /* Grid */
 .grid { 
   display: grid; 
@@ -269,6 +302,22 @@ img {
   background: var(--primary-color);
   color: white;
   transform: translateY(-2px);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: .375rem .75rem;
+  border-radius: 999px;
+  font-size: .8125rem;
+  font-weight: 600;
+  background: var(--bg-light);
+  color: var(--text-muted);
+}
+
+.badge-primary {
+  background: rgba(79, 70, 229, .12);
+  color: #4338ca;
 }
 
 /* Special sections */
@@ -516,6 +565,30 @@ footer.site {
   background: var(--bg-light); 
 }
 
+/* Forms */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+  width: 100%;
+  padding: .875rem 1rem;
+  border-radius: .5rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  color: var(--text-color);
+  transition: var(--transition);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, .15);
+}
+
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   :root {
@@ -531,6 +604,7 @@ footer.site {
   .card, .service-card, .info-card, .feature-card, .target-card, .security-card, .founder-card, .value-card { background: #0e1426; border-color: #1f2937; }
   .mockup .mockup-header { background: #0e1426; border-color: #1f2937; }
   .mockup .mockup-body { background: #0e1426; }
+  .trust-strip { background: #0e1426; }
 }
 
 /* Animations */
