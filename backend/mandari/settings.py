@@ -84,7 +84,6 @@ REST_FRAMEWORK = {
 	],
 	"DEFAULT_AUTHENTICATION_CLASSES": [
 		"rest_framework.authentication.SessionAuthentication",
-		"rest_framework.authentication.BasicAuthentication",
 	],
 	"DEFAULT_PERMISSION_CLASSES": [
 		"rest_framework.permissions.IsAuthenticatedOrReadOnly",
@@ -138,4 +137,11 @@ if not CORS_ALLOWED_ORIGINS and DEBUG:
 else:
 	CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = False
+
+# Cookies/CSRF
+CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False") == "True"
+CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "False") == "True"
 

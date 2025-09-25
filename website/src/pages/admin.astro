@@ -1,0 +1,73 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const apiBase = import.meta.env.PUBLIC_API_URL || "http://localhost:8000/api";
+const resTenants = await fetch(`${apiBase}/tenants/`);
+const tenants = resTenants.ok ? await resTenants.json() : [];
+const resSources = await fetch(`${apiBase}/oparl-sources/`);
+const sources = resSources.ok ? await resSources.json() : [];
+---
+<BaseLayout title="Admin – Mandari" description="System-Admin Dashboard">
+  <section class="section">
+    <div class="container">
+      <h1>System-Administration</h1>
+      <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div class="card">
+          <h3>Mandanten</h3>
+          <p class="muted">Anlegen, Domain/Subspace pflegen</p>
+          <form id="tenant-form" class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <input type="text" name="name" placeholder="Name" required />
+            <input type="text" name="slug" placeholder="Slug" required />
+            <input type="text" name="domain" placeholder="Domain (optional)" />
+            <button class="btn btn-primary" type="submit">Mandant anlegen</button>
+          </form>
+          <ul>
+            {tenants.map((t: any) => (
+              <li><strong>{t.name}</strong> <span class="muted">({t.slug})</span> {t.domain ? `– ${t.domain}` : ''}</li>
+            ))}
+          </ul>
+        </div>
+        <div class="card">
+          <h3>OParl-Quellen</h3>
+          <p class="muted">Status ohne personenbezogene Daten</p>
+          <ul>
+            {sources.map((s: any) => (
+              <li>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+                  <div>
+                    <div>{s.root_url}</div>
+                    <div class="muted">Tenant #{s.tenant} – {s.enabled ? 'aktiv' : 'inaktiv'} – {s.last_synced_at || 'nie synchronisiert'}</div>
+                  </div>
+                  <button class="btn btn-secondary" data-source-id={s.id}>Sync starten</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const apiBase = import.meta.env.PUBLIC_API_URL || "http://localhost:8000/api";
+
+  document.getElementById('tenant-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const data = Object.fromEntries(new FormData(form) as any);
+    const r = await fetch(`${apiBase}/tenants/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), credentials: 'include' });
+    if (r.ok) location.reload();
+    else alert('Fehler beim Anlegen des Mandanten');
+  });
+
+  document.querySelectorAll('[data-source-id]')?.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const id = (btn as HTMLElement).getAttribute('data-source-id');
+      if (!id) return;
+      const r = await fetch(`${apiBase}/oparl-sources/${id}/trigger/`, { method: 'POST', credentials: 'include' });
+      if (r.ok) alert('Ingest angestoßen'); else alert('Fehler beim Start');
+    });
+  });
+</script>
+

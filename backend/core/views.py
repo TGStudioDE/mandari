@@ -1,9 +1,10 @@
 import os
-from rest_framework import permissions, status, viewsets
+from rest_framework import permissions, status, viewsets, serializers
+from django.contrib.auth import authenticate, login, logout
 from rest_framework.response import Response
 
 from rest_framework.decorators import action
-from .models import AgendaItem, Committee, Document, Lead, Meeting, Motion, OParlSource, Organization, Person, ShareLink, Team, TeamMembership, Tenant
+from .models import AgendaItem, Committee, Document, Lead, Meeting, Motion, OParlSource, Organization, Person, RoleAssignment, ShareLink, Team, TeamMembership, Tenant
 from .serializers import (
 	AgendaItemSerializer,
 	CommitteeSerializer,
@@ -14,6 +15,7 @@ from .serializers import (
     OParlSourceSerializer,
 	OrganizationSerializer,
 	PersonSerializer,
+    RoleAssignmentSerializer,
 	ShareLinkSerializer,
     TeamMembershipSerializer,
     TeamSerializer,
@@ -36,6 +38,13 @@ class TenantViewSet(viewsets.ModelViewSet):
 	queryset = Tenant.objects.all()
 	serializer_class = TenantSerializer
 	permission_classes = [permissions.IsAdminUser]
+
+    @action(detail=True, methods=["post"], url_path="create-subspace")
+    def create_subspace(self, request, pk=None):
+        """Platzhalter: Subspace/Domain-Provisionierung triggern."""
+        tenant = self.get_object()
+        # Hier könnten DNS/Ingress/Storage-Routinen angestoßen werden.
+        return Response({"detail": f"Subspace für {tenant.slug} angestoßen."})
 
 
 class CommitteeViewSet(BaseTenantViewSet):
@@ -158,3 +167,64 @@ class LeadViewSet(viewsets.ModelViewSet):
 			lead.confirmed_at = timezone.now()
 			lead.save(update_fields=["confirmed_at", "updated_at"])
 		return Response({"detail": "Bestätigt."})
+
+
+class RoleAssignmentViewSet(viewsets.ModelViewSet):
+	queryset = RoleAssignment.objects.all().select_related("user", "committee", "tenant")
+	serializer_class = RoleAssignmentSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+	"""Einfache User-API mit Mandanten-Scope. Nur Admins dürfen global zugreifen.
+
+	Für Nicht-Superuser wird automatisch nach `request.user.tenant` gefiltert.
+	"""
+	from django.contrib.auth import get_user_model
+	User = get_user_model()
+	queryset = User.objects.all()
+	permission_classes = [permissions.IsAuthenticated]
+
+	def get_queryset(self):
+		qs = super().get_queryset()
+		user = self.request.user
+		if not user.is_superuser and getattr(user, "tenant_id", None):
+			qs = qs.filter(tenant_id=user.tenant_id)
+		return qs
+
+	class SerializerClass(serializers.ModelSerializer):
+		class Meta:
+			model = UserViewSet.User
+			fields = ["id", "username", "first_name", "last_name", "email", "tenant", "role", "is_active", "is_staff"]
+
+	serializer_class = SerializerClass
+
+
+class AuthViewSet(viewsets.ViewSet):
+	permission_classes = [permissions.AllowAny]
+
+	@action(detail=False, methods=["post"], url_path="login")
+	def login_view(self, request):
+		username = request.data.get("username")
+		password = request.data.get("password")
+		user = authenticate(request, username=username, password=password)
+		if user is None:
+			return Response({"detail": "Ungültige Zugangsdaten"}, status=400)
+		login(request, user)
+		return Response({"detail": "Eingeloggt"})
+
+	@action(detail=False, methods=["post"], url_path="logout")
+	def logout_view(self, request):
+		logout(request)
+		return Response({"detail": "Ausgeloggt"})
+
+	@action(detail=False, methods=["get"], url_path="me", permission_classes=[permissions.IsAuthenticated])
+	def me(self, request):
+		user = request.user
+		return Response({
+			"id": user.id,
+			"username": user.username,
+			"tenant": getattr(user, "tenant_id", None),
+			"role": getattr(user, "role", None),
+			"is_staff": user.is_staff,
+			"is_superuser": user.is_superuser,
+		})

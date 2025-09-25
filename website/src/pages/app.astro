@@ -1,0 +1,72 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+const apiBase = import.meta.env.PUBLIC_API_URL || "http://localhost:8000/api";
+const meRes = await fetch(`${apiBase}/auth/me/`, { headers: {}, redirect: 'manual' }).catch(() => null);
+let me: any = null;
+try { me = meRes && meRes.ok ? await meRes.json() : null; } catch {}
+---
+<BaseLayout title="Mandari – Dashboard" description="Kunden-Dashboard">
+  <section class="section">
+    <div class="container">
+      <div class="grid" style="grid-template-columns: 260px 1fr; gap: 2rem;">
+        <aside class="card" style="padding: 1rem;">
+          <nav class="sidebar">
+            <a href="#" data-view="overview" class="is-active">Übersicht</a>
+            <a href="#" data-view="committees">Gremien</a>
+            <a href="#" data-view="documents">Dokumente</a>
+            <a href="#" data-view="templates">Vorlagen</a>
+            {me?.is_staff ? <a href="/admin" data-view="admin">System-Admin</a> : null}
+          </nav>
+        </aside>
+        <div class="card" style="min-height: 400px;">
+          <div id="view-overview">
+            <h2>Willkommen{me ? `, ${me.username}` : ''}</h2>
+            <p class="muted">Schnellzugriff und zuletzt geänderte Inhalte.</p>
+          </div>
+          <div id="view-committees" style="display:none"></div>
+          <div id="view-documents" style="display:none"></div>
+          <div id="view-templates" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .sidebar { display:flex; flex-direction:column; gap:.5rem; }
+  .sidebar a { color: var(--text-color); }
+  .sidebar a.is-active { color: var(--primary-color); font-weight: 600; }
+</style>
+
+<script>
+  const apiBase = import.meta.env.PUBLIC_API_URL || "http://localhost:8000/api";
+  const tabs = document.querySelectorAll('.sidebar a[data-view]');
+  const views: Record<string, HTMLElement | null> = {
+    overview: document.getElementById('view-overview'),
+    committees: document.getElementById('view-committees'),
+    documents: document.getElementById('view-documents'),
+    templates: document.getElementById('view-templates'),
+  };
+
+  tabs.forEach((a) => a.addEventListener('click', async (e) => {
+    e.preventDefault();
+    tabs.forEach((x) => x.classList.remove('is-active'));
+    const el = e.currentTarget as HTMLAnchorElement;
+    el.classList.add('is-active');
+    const view = el.getAttribute('data-view')!;
+    Object.entries(views).forEach(([k, node]) => node && (node.style.display = k === view ? 'block' : 'none'));
+    if (view === 'committees') {
+      const r = await fetch(`${apiBase}/committees/`);
+      const data = r.ok ? await r.json() : [];
+      const node = views['committees'];
+      if (node) node.innerHTML = `<h2>Gremien</h2>` + `<ul>` + data.map((c:any)=>`<li>${c.name}</li>`).join('') + `</ul>`;
+    }
+    if (view === 'documents') {
+      const r = await fetch(`${apiBase}/documents/?limit=20`);
+      const data = r.ok ? await r.json() : [];
+      const node = views['documents'];
+      if (node) node.innerHTML = `<h2>Dokumente</h2>` + `<ul>` + data.map((d:any)=>`<li>${d.title}</li>`).join('') + `</ul>`;
+    }
+  }));
+</script>
+

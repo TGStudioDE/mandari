@@ -192,3 +192,20 @@ class Lead(models.Model):
 	def is_confirmed(self) -> bool:
 		return self.confirmed_at is not None
 
+
+class RoleAssignment(models.Model):
+	"""Verknüpft Benutzerrollen zu Gremien innerhalb eines Mandanten.
+
+	Beispiele für Rollen: "sachkundig", "ratsherr", "bezirksvertretung".
+	"""
+	tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="role_assignments")
+	committee = models.ForeignKey(Committee, on_delete=models.CASCADE, related_name="role_assignments")
+	role = models.CharField(max_length=100)
+
+	class Meta:
+		unique_together = ("tenant", "user", "committee", "role")
+
+	def __str__(self) -> str:
+		return f"{self.tenant_id}:{self.user_id}:{self.committee_id}:{self.role}"
+

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AgendaItem, Committee, Document, Meeting, Motion, Notification, OParlSource, Organization, Person, Position, ShareLink, Team, TeamMembership, Tenant, User
+from .models import AgendaItem, Committee, Document, Meeting, Motion, Notification, OParlSource, Organization, Person, Position, RoleAssignment, ShareLink, Team, TeamMembership, Tenant, User
 
 
 admin.site.register(Tenant)
@@ -18,4 +18,5 @@ admin.site.register(Notification)
 admin.site.register(Team)
 admin.site.register(TeamMembership)
 admin.site.register(OParlSource)
+admin.site.register(RoleAssignment)
 
