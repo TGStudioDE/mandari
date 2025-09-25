@@ -5,12 +5,12 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000/api';
 ---
 <BaseLayout title="Mandari – Das moderne Ratsarbeitssystem" description="Mandari verwandelt traditionelle Ratsinformationssysteme in aktive Arbeitsumgebungen. Intelligente Analyse, Kollaboration und Workflows für moderne Kommunalpolitik.">
   <!-- Hero Section -->
-  <section class="hero">
+  <section class="hero" aria-labelledby="mandari-hero">
     <div class="container">
       <div class="hero-content">
         <div class="hero-text">
           <div class="product-badge">Produkt</div>
-          <h1>Mandari</h1>
+          <h1 id="mandari-hero">Mandari</h1>
           <p class="hero-subtitle">Das Ratsarbeitssystem (RAS) – von der Dokumentenflut zur aktiven Arbeit</p>
           <div class="hero-actions">
             <a href="#kontakt" class="btn btn-primary">Demo anfragen</a>
@@ -50,10 +50,10 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000/api';
   </section>
 
   <!-- Problem Section -->
-  <section class="section problem-section">
+  <section class="section problem-section" aria-labelledby="problem">
     <div class="container">
       <div class="section-header">
-        <h2>Das Problem mit traditionellen RIS</h2>
+        <h2 id="problem">Das Problem mit traditionellen RIS</h2>
         <p class="section-subtitle">Ratsinformationssysteme sind oft unübersichtlich und passiv</p>
       </div>
       <div class="problem-grid">
@@ -77,10 +77,10 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000/api';
   </section>
 
   <!-- Solution Section -->
-  <section class="section solution-section">
+  <section class="section solution-section" aria-labelledby="solution">
     <div class="container">
       <div class="section-header">
-        <h2>Die Mandari-Lösung</h2>
+        <h2 id="solution">Die Mandari-Lösung</h2>
         <p class="section-subtitle">Aktive Ratsarbeit mit moderner Technologie</p>
       </div>
       <div class="solution-content">
@@ -122,10 +122,10 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000/api';
   </section>
 
   <!-- Features Section -->
-  <section id="features" class="section features-section">
+  <section id="features" class="section features-section" aria-labelledby="features-title">
     <div class="container">
       <div class="section-header">
-        <h2>Features</h2>
+        <h2 id="features-title">Features</h2>
         <p class="section-subtitle">Alles was moderne Ratsarbeit braucht</p>
       </div>
       <div class="features-grid">
@@ -164,10 +164,10 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000/api';
   </section>
 
   <!-- Target Groups Section -->
-  <section class="section target-section">
+  <section class="section target-section" aria-labelledby="target">
     <div class="container">
       <div class="section-header">
-        <h2>Für wen ist Mandari?</h2>
+        <h2 id="target">Für wen ist Mandari?</h2>
         <p class="section-subtitle">Alle Akteure der Kommunalpolitik profitieren</p>
       </div>
       <div class="target-grid">
@@ -196,10 +196,10 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000/api';
   </section>
 
   <!-- Security Section -->
-  <section class="section security-section">
+  <section class="section security-section" aria-labelledby="security">
     <div class="container">
       <div class="section-header">
-        <h2>Sicherheit & DSGVO</h2>
+        <h2 id="security">Sicherheit & DSGVO</h2>
         <p class="section-subtitle">Höchste Standards für sensible Verwaltungsdaten</p>
       </div>
       <div class="security-grid">
@@ -223,10 +223,10 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000/api';
   </section>
 
   <!-- CTA Section -->
-  <section id="kontakt" class="section cta-section">
+  <section id="kontakt" class="section cta-section" aria-labelledby="cta">
     <div class="container">
       <div class="cta-content">
-        <h2>Bereit für moderne Ratsarbeit?</h2>
+        <h2 id="cta">Bereit für moderne Ratsarbeit?</h2>
         <p>Lassen Sie uns Mandari gemeinsam entwickeln und Ihre Verwaltung digitalisieren.</p>
         <div class="cta-actions">
           <a href="/kontakt" class="btn btn-primary">Demo anfragen</a>
