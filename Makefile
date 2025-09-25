@@ -2,7 +2,7 @@ SHELL := /usr/bin/bash
 COMPOSE := docker compose
 
 .PHONY: up down logs restart ps build migrate createsuperuser django-shell openapi fmt lint \
-	backend-makemigrations ingest-run ai-run
+	backend-makemigrations ingest-run ai-run website-run
 
 up:
 	$(COMPOSE) up -d
@@ -51,4 +51,7 @@ ai-run:
 
 test:
 	$(COMPOSE) exec backend pytest -q | cat
+
+website-run:
+	$(COMPOSE) exec website bash -lc "pnpm dev --host 0.0.0.0"
 

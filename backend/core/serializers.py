@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import AgendaItem, Committee, Document, Meeting, Motion, OParlSource, Organization, Person, ShareLink, Team, TeamMembership, Tenant
+from .models import AgendaItem, Committee, Document, Lead, Meeting, Motion, OParlSource, Organization, Person, ShareLink, Team, TeamMembership, Tenant
 
 
 class TenantSerializer(serializers.ModelSerializer):
@@ -86,4 +86,24 @@ class OParlSourceSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = OParlSource
 		fields = ["id", "tenant", "root_url", "enabled", "last_synced_at", "etag", "last_modified"]
+
+
+class LeadSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Lead
+		fields = [
+			"id",
+			"tenant",
+			"company",
+			"name",
+			"email",
+			"message",
+			"consent_privacy",
+			"consent_marketing",
+			"confirm_token",
+			"confirmed_at",
+			"created_at",
+			"updated_at",
+		]
+		read_only_fields = ["confirm_token", "confirmed_at", "created_at", "updated_at"]
 

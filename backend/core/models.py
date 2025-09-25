@@ -3,6 +3,8 @@ from __future__ import annotations
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
+import uuid
 
 
 class Tenant(models.Model):
@@ -165,4 +167,28 @@ class OParlSource(models.Model):
 
 	class Meta:
 		unique_together = ("tenant", "root_url")
+
+
+class Lead(models.Model):
+	"""Lead-Eintrag für Website-Kontakt mit Double-Opt-In."""
+	tenant = models.ForeignKey(Tenant, on_delete=models.SET_NULL, null=True, blank=True)
+	company = models.CharField(max_length=255, blank=True, default="")
+	name = models.CharField(max_length=255)
+	email = models.EmailField(db_index=True)
+	message = models.TextField(blank=True, default="")
+	consent_privacy = models.BooleanField(default=False)
+	consent_marketing = models.BooleanField(default=False)
+	confirm_token = models.CharField(max_length=64, unique=True, default="", blank=True)
+	confirmed_at = models.DateTimeField(null=True, blank=True)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	def save(self, *args, **kwargs):
+		if not self.confirm_token:
+			self.confirm_token = uuid.uuid4().hex
+		return super().save(*args, **kwargs)
+
+	@property
+	def is_confirmed(self) -> bool:
+		return self.confirmed_at is not None
 

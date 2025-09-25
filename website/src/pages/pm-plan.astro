@@ -1,0 +1,73 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Icon from "../components/Icon.astro";
+---
+<BaseLayout title="Produktmanagement‑Plan – Struktur & KI‑Assistent" description="Planen, strukturieren und priorisieren – mit klaren Artefakten und einem KI‑Assistenten für Fragen zu Markt, USP und MSP.">
+  <section class="hero" aria-labelledby="pm-hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1 id="pm-hero">Produktmanagement‑Plan</h1>
+        <p class="hero-subtitle">Struktur, Roadmaps, Meilensteine – plus KI‑Assistent für Markt-, USP- und MSP‑Fragen</p>
+        <div class="hero-actions">
+          <a href="/kontakt" class="btn btn-primary">Demo anfragen</a>
+          <a href="#struktur" class="btn btn-secondary">Struktur ansehen</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="struktur" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Struktur & Artefakte</h2>
+        <p class="section-subtitle">Klar definierte Bausteine – für Mittelstand und Startups</p>
+      </div>
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+        <div class="card"><h3>Produkt‑Canvas</h3><p class="muted">Vision, Zielgruppen, Nutzenversprechen, Differenzierung</p></div>
+        <div class="card"><h3>Roadmap</h3><p class="muted">Quartalsziele, Releases, Abhängigkeiten</p></div>
+        <div class="card"><h3>Backlog</h3><p class="muted">Epics, Stories, Akzeptanzkriterien</p></div>
+        <div class="card"><h3>KPIs</h3><p class="muted">Outcome‑Metriken, Adoption, NPS, SLA</p></div>
+        <div class="card"><h3>Risiken</h3><p class="muted">Annahmen, Gegenmaßnahmen, Entscheidungslog</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2>KI‑Assistent</h2>
+        <p class="section-subtitle">Fragen zu Markt, USP und MSP – direkt im Kontext eures Plans</p>
+      </div>
+      <div class="grid" style="grid-template-columns: 1.2fr 1fr; gap: 2rem; align-items:center;">
+        <div>
+          <div class="card" style="padding:1.5rem">
+            <h3>Frag die KI</h3>
+            <p class="muted">Beispiele:</p>
+            <ul>
+              <li>Welche Hypothesen fehlen uns für den MSP?</li>
+              <li>Welche Risiken sehe ich in Q3 in der Roadmap?</li>
+              <li>Wie unterscheiden wir uns vom Wettbewerber X?</li>
+            </ul>
+            <p class="muted" style="margin-top:1rem">Optional: Anbindung an interne Wissensquellen (Confluence, Drive, Git).</p>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="min-height:220px; display:grid;place-items:center">Live‑Demo in Arbeit</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Bereit, strukturiert zu starten?</h2>
+        <p>Wir begleiten von der ersten Idee bis zum skalierbaren Produkt.</p>
+        <div class="cta-actions">
+          <a href="/kontakt" class="btn btn-primary">Kontakt aufnehmen</a>
+          <a href="/faq" class="btn btn-secondary">FAQ lesen</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,188 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Icon from "../components/Icon.astro";
+const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000/api';
+---
+<BaseLayout title="Konopka & Kramin – Moderne Softwarelösungen" description="Wir entwickeln innovative Softwarelösungen für die öffentliche Verwaltung. Unser erstes Produkt: Mandari - das moderne Ratsarbeitssystem.">
+  <!-- Hero Section -->
+  <section class="hero hero-split" aria-labelledby="hero-title">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <span class="eyebrow">Konopka & Kramin</span>
+          <h1 id="hero-title">Software für die Verwaltung von morgen</h1>
+          <p class="hero-subtitle">Wir bauen praxistaugliche, sichere und performante Software – mit Fokus auf echte Wirkung statt Buzzwords.</p>
+          <div class="hero-actions">
+            <a href="/mandari" class="btn btn-primary">Mandari entdecken</a>
+            <a href="/team" class="btn btn-secondary">Unser Team</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="mockup">
+            <div class="mockup-header">
+              <div class="mockup-dots"><span></span><span></span><span></span></div>
+              <span>Mandari Vorschau</span>
+            </div>
+            <div class="mockup-body">
+              <div class="mockup-content" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                <div class="mockup-card" style="background:var(--bg-light);padding:1rem;border-radius:.5rem">
+                  <h4 style="margin:0 0 .5rem 0">Heutige Sitzung</h4>
+                  <p style="margin:0" class="muted">3 Anträge, 2 Dokumente</p>
+                </div>
+                <div class="mockup-card" style="background:var(--bg-light);padding:1rem;border-radius:.5rem">
+                  <h4 style="margin:0 0 .5rem 0">KI‑Zusammenfassung</h4>
+                  <p style="margin:0" class="muted">Wichtige Punkte identifiziert</p>
+                </div>
+                <div class="mockup-card" style="background:var(--bg-light);padding:1rem;border-radius:.5rem">
+                  <h4 style="margin:0 0 .5rem 0">Tagesordnung</h4>
+                  <p style="margin:0" class="muted">Personalisiert nach Relevanz</p>
+                </div>
+                <div class="mockup-card" style="background:var(--bg-light);padding:1rem;border-radius:.5rem">
+                  <h4 style="margin:0 0 .5rem 0">Suche</h4>
+                  <p style="margin:0" class="muted">Dokumente & Anträge schneller finden</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="section about-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Über uns</h2>
+        <p class="section-subtitle">Startup von Sten Kramin (CEO) und Sven Konopka (CTO) – Software für Politik, Verwaltung und Mittelstand</p>
+      </div>
+      <div class="about-content">
+        <div class="about-text">
+          <p>Konopka & Kramin ist ein junges Softwarehaus, das sich auf innovative Lösungen für die öffentliche Verwaltung spezialisiert hat. Wir glauben daran, dass moderne Technologie Verwaltungsprozesse revolutionieren kann.</p>
+          <p>Unser Fokus liegt auf benutzerfreundlichen, sicheren und skalierbaren Anwendungen, die echte Mehrwerte für Verwaltungsmitarbeiter und Bürger schaffen.</p>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-number">2</span>
+            <span class="stat-label">Gründer</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">1</span>
+            <span class="stat-label">Produkt</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">2024</span>
+            <span class="stat-label">Gegründet</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product Showcase -->
+  <section class="section product-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Unser Produkt</h2>
+        <p class="section-subtitle">Mandari - Das moderne Ratsarbeitssystem</p>
+      </div>
+      <div class="product-showcase">
+        <div class="product-info">
+          <h3>Von RIS zu RAS</h3>
+          <p>Mandari verwandelt traditionelle Ratsinformationssysteme in aktive Arbeitsumgebungen. Statt passiv Informationen zu verwalten, wird Mandari zum intelligenten Werkzeug für moderne Kommunalpolitik.</p>
+          <div class="product-features">
+            <div class="feature-item">
+              <Icon name="ai" />
+              <span>KI-gestützte Analyse</span>
+            </div>
+            <div class="feature-item">
+              <Icon name="collaboration" />
+              <span>Kollaborative Workflows</span>
+            </div>
+            <div class="feature-item">
+              <Icon name="search" />
+              <span>Intelligente Suche</span>
+            </div>
+          </div>
+          <a href="/mandari" class="btn btn-primary">Mehr über Mandari</a>
+        </div>
+        <div class="product-visual">
+          <div class="product-mockup">
+            <div class="mockup-header">
+              <div class="mockup-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <span>Mandari Dashboard</span>
+            </div>
+            <div class="mockup-content">
+              <div class="mockup-sidebar">
+                <div class="sidebar-item active">Dashboard</div>
+                <div class="sidebar-item">Tagesordnung</div>
+                <div class="sidebar-item">Dokumente</div>
+                <div class="sidebar-item">Anträge</div>
+              </div>
+              <div class="mockup-main">
+                <div class="mockup-card">
+                  <h4>Heutige Sitzung</h4>
+                  <p>3 Anträge, 2 Dokumente</p>
+                </div>
+                <div class="mockup-card">
+                  <h4>KI-Zusammenfassung</h4>
+                  <p>Wichtige Punkte identifiziert</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="section services-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Unsere Bereiche</h2>
+        <p class="section-subtitle">Produkte und Lösungen für Politik, Verwaltung und Mittelstand</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card">
+          <Icon name="development" />
+          <h3>Mandari (RAS)</h3>
+          <p>Für Fraktionen, Gremien und Parteien in Räten – später auch Verwaltung: aktive Ratsarbeit statt Dokumentenflut.</p>
+          <a href="/mandari" class="btn btn-secondary" style="margin-top: .5rem">Mehr erfahren</a>
+        </div>
+        <div class="service-card">
+          <Icon name="consulting" />
+          <h3>Produktmanagement‑Plan (mit KI)</h3>
+          <p>Struktur, Roadmaps, Meilensteine – plus KI‑Assistent für Fragen zu Markt, USP und MSP.</p>
+          <a href="/pm-plan" class="btn btn-secondary" style="margin-top: .5rem">Mehr erfahren</a>
+        </div>
+        <div class="service-card">
+          <Icon name="integration" />
+          <h3>Integration & Daten</h3>
+          <p>Schnittstellen, OParl, S3, OpenSearch – robuste Datenflüsse für den Mittelstand.</p>
+        </div>
+        <div class="service-card">
+          <Icon name="support" />
+          <h3>Enablement</h3>
+          <p>Workshops, Schulungen, Dokumentation – damit Teams schnell produktiv werden.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Bereit für die digitale Zukunft?</h2>
+        <p>Lassen Sie uns gemeinsam Ihre Verwaltung modernisieren und effizienter gestalten.</p>
+        <div class="cta-actions">
+          <a href="/kontakt" class="btn btn-primary">Kontakt aufnehmen</a>
+          <a href="/mandari" class="btn btn-secondary">Mandari entdecken</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
