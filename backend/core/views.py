@@ -1,5 +1,7 @@
 import os
 from rest_framework import permissions, status, viewsets, serializers
+from rest_framework.decorators import api_view
+from drf_spectacular.utils import extend_schema
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from rest_framework.response import Response
 
@@ -72,16 +74,13 @@ from .serializers import (
     OfferDraftSerializer,
 )
 
+from .authz import BaseOrgScopeMixin
 
-class BaseTenantViewSet(viewsets.ModelViewSet):
-	permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-	def get_queryset(self):
-		qs = super().get_queryset()
-		tenant_id = self.request.query_params.get("tenant")
-		if tenant_id:
-			qs = qs.filter(tenant_id=tenant_id)
-		return qs
+class BaseTenantViewSet(BaseOrgScopeMixin, viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    # Org-Scope erfolgt im Mixin (tenant_id/org_id automatisch)
 
 
 class TenantViewSet(viewsets.ModelViewSet):

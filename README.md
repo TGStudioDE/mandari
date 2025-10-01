@@ -55,3 +55,13 @@ Sicherheit & DSGVO
 
 # mandari
 
+## MVP Closeout Progress
+
+Version 0.1.1
+
+- STEP 0
+  - Org-Scoping zentral via `BaseOrgScopeMixin` (JWT/Session/Header)
+  - OpenSearch Index-Prefix pro Org (german analyzer, completion field)
+  - Health `/-/health` und Metrics `/-/metrics` (Prometheus)
+  - Request-ID Middleware, Security-Header, DRF Rate Limits
+

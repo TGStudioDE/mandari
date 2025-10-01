@@ -22,10 +22,12 @@ INSTALLED_APPS = [
 	"drf_spectacular",
 	"django_filters",
 	"corsheaders",
+	"django_prometheus",
 	"core",
 ]
 
 MIDDLEWARE = [
+	"django_prometheus.middleware.PrometheusBeforeMiddleware",
 	"django.middleware.security.SecurityMiddleware",
 	"django.contrib.sessions.middleware.SessionMiddleware",
 	"corsheaders.middleware.CorsMiddleware",
@@ -35,6 +37,8 @@ MIDDLEWARE = [
 	"django.contrib.messages.middleware.MessageMiddleware",
 	"django.middleware.clickjacking.XFrameOptionsMiddleware",
     "mandari.tenant_middleware.TenantMiddleware",
+	"mandari.request_id.RequestIdMiddleware",
+	"django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 ROOT_URLCONF = "mandari.urls"
@@ -88,6 +92,14 @@ REST_FRAMEWORK = {
 	"DEFAULT_PERMISSION_CLASSES": [
 		"rest_framework.permissions.IsAuthenticatedOrReadOnly",
 	],
+	"DEFAULT_THROTTLE_CLASSES": [
+		"rest_framework.throttling.AnonRateThrottle",
+		"rest_framework.throttling.UserRateThrottle",
+	],
+	"DEFAULT_THROTTLE_RATES": {
+		"anon": os.getenv("DRF_THROTTLE_ANON", "100/min"),
+		"user": os.getenv("DRF_THROTTLE_USER", "1000/min"),
+	},
 }
 
 SPECTACULAR_SETTINGS = {
@@ -137,6 +149,17 @@ if not CORS_ALLOWED_ORIGINS and DEBUG:
 else:
 	CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = os.getenv("CORS_ALLOW_CREDENTIALS", "True") == "True"
+
+# Security Headers
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS", "False") == "True"
+SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "False") == "True"
+SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False") == "True"
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False") == "True"
+CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "False") == "True"
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
 
 # Cookies/CSRF
 CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
