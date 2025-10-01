@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from rest_framework.response import Response
 
 from rest_framework.decorators import action
+from .search import index_document, get_client as get_search_client
 from .models import (
     AgendaItem,
     Committee,
@@ -65,11 +66,14 @@ from .serializers import (
     AuditLogSerializer,
     WebhookEndpointSerializer,
     ApiKeySerializer,
+    OAuthClientSerializer,
     PricingAgreementSerializer,
     MembershipSerializer,
     InvitationSerializer,
     StaffProfileSerializer,
     OfferDraftSerializer,
+    RoleSerializer,
+    UserRoleSerializer,
 )
 
 
@@ -197,31 +201,45 @@ class DocumentViewSet(BaseTenantViewSet):
 				return Response(ser.data, status=status.HTTP_200_OK)
 		return super().create(request, *args, **kwargs)
 
-	@action(detail=False, methods=["get"], url_path="search")
-	def search(self, request):
-		"""Einfache Volltextsuche in content_text/title, mandantenscope via ?tenant=.
-		q: Query, optional: committee_id, date_from, date_to
-		"""
-		q = request.query_params.get("q", "").strip()
+
+	def list(self, request, *args, **kwargs):
+		"""Einheitliche List-Parameter: q, filters[...], sort, page[size], page[after]."""
 		qs = self.get_queryset()
-		committee_id = request.query_params.get("committee_id")
-		if committee_id:
-			qs = qs.filter(agenda_item__meeting__committee_id=committee_id)
-		date_from = request.query_params.get("date_from")
-		date_to = request.query_params.get("date_to")
-		if date_from:
-			qs = qs.filter(created_at__date__gte=date_from)
-		if date_to:
-			qs = qs.filter(created_at__date__lte=date_to)
+		q = request.query_params.get("q", "").strip()
 		if q:
 			from django.db.models import Q
 			qs = qs.filter(Q(title__icontains=q) | Q(content_text__icontains=q))
-		page = self.paginate_queryset(qs.order_by("-created_at"))
-		if page is not None:
-			ser = self.get_serializer(page, many=True)
-			return self.get_paginated_response(ser.data)
-		ser = self.get_serializer(qs[:50], many=True)
-		return Response(ser.data)
+		for key, value in request.query_params.items():
+			if key.startswith("filters[") and key.endswith("]"):
+				field = key[8:-1]
+				if value:
+					qs = qs.filter(**{field: value})
+		sort = request.query_params.get("sort")
+		if sort:
+			fields = [f.strip() for f in sort.split(",") if f.strip()]
+			qs = qs.order_by(*fields)
+		else:
+			qs = qs.order_by("-created_at")
+		after = request.query_params.get("page[after]")
+		if after:
+			try:
+				after_id = int(after)
+				qs = qs.filter(id__lt=after_id)
+			except Exception:
+				pass
+		size = request.query_params.get("page[size]")
+		limit = 50
+		try:
+			if size:
+				limit = max(1, min(200, int(size)))
+		except Exception:
+			pass
+		items = list(qs[:limit])
+		ser = self.get_serializer(items, many=True)
+		return Response({
+			"data": ser.data,
+			"next": items[-1].id if items else None,
+		})
 
 
 class MotionViewSet(BaseTenantViewSet):
@@ -233,6 +251,82 @@ class ShareLinkViewSet(viewsets.ModelViewSet):
 	queryset = ShareLink.objects.all().select_related("motion")
 	serializer_class = ShareLinkSerializer
 	permission_classes = [permissions.AllowAny]
+
+
+class SearchViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(detail=False, methods=["post"], url_path="query")
+    def query(self, request):
+        """OpenSearch-DSL passthrough (Whitelist) mit Org-Scope."""
+        client = get_search_client()
+        body = request.data or {}
+        allowed = {"query", "aggs", "sort", "from", "size", "suggest"}
+        filtered = {k: v for k, v in body.items() if k in allowed}
+        tenant_id = getattr(getattr(request, "user", None), "tenant_id", None)
+        if tenant_id:
+            scope_filter = {"term": {"tenant_id": tenant_id}}
+            q = filtered.get("query") or {"match_all": {}}
+            filtered["query"] = {"bool": {"must": [q], "filter": [scope_filter]}}
+        index_name = os.getenv("OPENSEARCH_INDEX", "mandari-documents")
+        try:
+            res = client.search(index=index_name, body=filtered)
+            return Response(res)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
+    @action(detail=False, methods=["get"], url_path="suggest")
+    def suggest(self, request):
+        client = get_search_client()
+        q = request.query_params.get("q", "")
+        if not q:
+            return Response({"suggest": []})
+        index_name = os.getenv("OPENSEARCH_INDEX", "mandari-documents")
+        body = {
+            "suggest": {
+                "title-term": {"text": q, "term": {"field": "title"}},
+                "content-term": {"text": q, "term": {"field": "content_text"}},
+            }
+        }
+        try:
+            res = client.search(index=index_name, body=body)
+            return Response(res.get("suggest", {}))
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
+
+class AiViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def _call_ai(self, path: str, json: dict):
+        import httpx
+        base = os.getenv("AI_BASE_URL", "http://ai:8002")
+        with httpx.Client(timeout=30.0) as client:
+            r = client.post(f"{base}{path}", json=json)
+            return r.status_code, r.json()
+
+    @action(detail=False, methods=["post"], url_path="summarize")
+    def summarize(self, request):
+        text = request.data.get("text") or ""
+        max_words = int(request.data.get("length", 120))
+        status_code, data = self._call_ai("/summary", {"text": text, "max_words": max_words})
+        try:
+            AuditLog.objects.create(org=getattr(request.user, "tenant", None), actor=request.user if request.user.is_authenticated else None, action="ai.summarize", target_type="text", target_id="", diff_json={"len": len(text)})
+        except Exception:
+            pass
+        return Response(data, status=status_code)
+
+    @action(detail=False, methods=["post"], url_path="compare")
+    def compare(self, request):
+        return Response({"detail": "Not implemented in AI service"}, status=501)
+
+    @action(detail=False, methods=["post"], url_path="gapcheck")
+    def gapcheck(self, request):
+        return Response({"detail": "Not implemented in AI service"}, status=501)
+
+    @action(detail=False, methods=["post"], url_path="redact")
+    def redact(self, request):
+        return Response({"detail": "Not implemented in AI service"}, status=501)
 
 
 class TeamViewSet(BaseTenantViewSet):
@@ -257,10 +351,57 @@ class OParlSourceViewSet(BaseTenantViewSet):
 			source = self.get_object()
 			base = os.getenv("INGEST_BASE_URL", "http://ingest:8001")
 			with httpx.Client(timeout=30.0) as client:
-				r = client.post(f"{base}/oparl/ingest", params={"root": source.root_url, "tenant_id": source.tenant_id})
-				return Response(r.json(), status=r.status_code)
+				params = {"root": source.root_url, "tenant_id": source.tenant_id}
+				if source.etag:
+					params["etag"] = source.etag
+				if source.last_modified:
+					params["last_modified"] = source.last_modified
+				r = client.post(f"{base}/oparl/ingest", params=params)
+				data = r.json()
+				# Aktualisiere ETag/Last-Modified
+				if isinstance(data, dict):
+					etag = data.get("etag")
+					lm = data.get("last_modified")
+					update_fields = []
+					if etag and etag != source.etag:
+						source.etag = etag
+						update_fields.append("etag")
+					if lm and lm != source.last_modified:
+						source.last_modified = lm
+						update_fields.append("last_modified")
+					if update_fields:
+						source.save(update_fields=update_fields)
+				return Response(data, status=r.status_code)
 		except Exception as e:
 			return Response({"error": str(e)}, status=500)
+
+	@action(detail=False, methods=["post"], url_path="validate")
+	def validate(self, request):
+		"""Validiert eine OParl-Quelle, ohne sie zu speichern."""
+		root_url = request.data.get("root_url")
+		if not root_url:
+			return Response({"detail": "root_url erforderlich"}, status=400)
+		try:
+			import httpx
+			with httpx.Client(timeout=10.0) as client:
+				r = client.get(root_url)
+				r.raise_for_status()
+				j = r.json()
+				ok = bool(j.get("body") or j.get("meeting") or j.get("paper"))
+				return Response({"ok": ok, "keys": list(j.keys())[:20]})
+		except Exception as e:
+			return Response({"ok": False, "error": str(e)}, status=400)
+
+	@action(detail=False, methods=["post"], url_path="create")
+	def create_source(self, request):
+		"""Alias für POST /connectors/oparl: Quelle anlegen & optional validieren."""
+		validate_only = bool(request.data.get("validate_only"))
+		if validate_only:
+			return self.validate(request)
+		ser = self.get_serializer(data=request.data)
+		ser.is_valid(raise_exception=True)
+		obj = ser.save()
+		return Response(self.get_serializer(obj).data, status=201)
 
 
 class LeadViewSet(viewsets.ModelViewSet):
@@ -316,6 +457,18 @@ class LeadViewSet(viewsets.ModelViewSet):
 class RoleAssignmentViewSet(viewsets.ModelViewSet):
 	queryset = RoleAssignment.objects.all().select_related("user", "committee", "tenant")
 	serializer_class = RoleAssignmentSerializer
+
+
+class RoleViewSet(viewsets.ModelViewSet):
+    queryset = __import__("core.models", fromlist=["Role"]).Role.objects.all().select_related("org")
+    serializer_class = RoleSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+
+class UserRoleViewSet(viewsets.ModelViewSet):
+    queryset = __import__("core.models", fromlist=["UserRole"]).UserRole.objects.all().select_related("org", "user", "role")
+    serializer_class = UserRoleSerializer
+    permission_classes = [permissions.IsAdminUser]
 
 
 class SubspaceViewSet(viewsets.ModelViewSet):
@@ -413,6 +566,12 @@ class WebhookEndpointViewSet(viewsets.ModelViewSet):
 class ApiKeyViewSet(viewsets.ModelViewSet):
     queryset = ApiKey.objects.all().select_related("org")
     serializer_class = ApiKeySerializer
+    permission_classes = [permissions.IsAdminUser, AdminMfaRequired]
+
+
+class OAuthClientViewSet(viewsets.ModelViewSet):
+    queryset = __import__("core.models", fromlist=["OAuthClient"]).OAuthClient.objects.all().select_related("org")
+    serializer_class = OAuthClientSerializer
     permission_classes = [permissions.IsAdminUser, AdminMfaRequired]
 
 
@@ -755,6 +914,125 @@ class AuthViewSet(viewsets.ViewSet):
 			return Response({"detail": "MFA erforderlich"}, status=412)
 		login(request, user)
 		return Response({"detail": "Eingeloggt"})
+
+    @action(detail=False, methods=["post"], url_path="token")
+    def token(self, request):
+        """OAuth2 Token: grant_type=password|client_credentials → JWT (HS256).
+
+        Response: {access_token, token_type, expires_in}
+        """
+        import os, jwt, uuid
+        from datetime import datetime, timedelta, timezone
+        grant_type = request.data.get("grant_type")
+        if grant_type not in ("password", "client_credentials"):
+            return Response({"error": "unsupported_grant_type"}, status=400)
+
+        audience = os.getenv("JWT_AUDIENCE", "mandari-api")
+        issuer = os.getenv("JWT_ISSUER", "mandari")
+        lifetime_s = int(os.getenv("JWT_LIFETIME_SECONDS", "3600"))
+        secret = os.getenv("JWT_SECRET", os.getenv("DJANGO_SECRET_KEY", "insecure"))
+        now = datetime.now(tz=timezone.utc)
+        exp = now + timedelta(seconds=lifetime_s)
+
+        scopes: list[str] = []
+        sub = None
+        org_id = None
+
+        if grant_type == "password":
+            username = request.data.get("username")
+            password = request.data.get("password")
+            if not username or not password:
+                return Response({"error": "invalid_request"}, status=400)
+            user = authenticate(request, username=username, password=password)
+            if user is None:
+                return Response({"error": "invalid_grant"}, status=400)
+            # MFA-Policy: falls aktiv und ohne gültige Session, optional restriktiver gestalten
+            sub = str(user.id)
+            org_id = getattr(user, "tenant_id", None)
+            scopes = ["user"]
+
+        if grant_type == "client_credentials":
+            client_id = request.data.get("client_id")
+            client_secret = request.data.get("client_secret")
+            if not client_id or not client_secret:
+                return Response({"error": "invalid_request"}, status=400)
+            from core.models import OAuthClient
+            client = OAuthClient.objects.filter(client_id=client_id, is_active=True).select_related("org").first()
+            if not client or not client.check_secret(client_secret):
+                return Response({"error": "invalid_client"}, status=401)
+            sub = f"client:{client.id}"
+            org_id = client.org_id
+            scopes = list(client.scopes or [])
+            client.last_used_at = now
+            client.save(update_fields=["last_used_at"])
+
+        payload = {
+            "iss": issuer,
+            "aud": audience,
+            "iat": int(now.timestamp()),
+            "exp": int(exp.timestamp()),
+            "jti": uuid.uuid4().hex,
+            "sub": sub,
+            "org_id": org_id,
+            "scopes": scopes,
+        }
+        token = jwt.encode(payload, secret, algorithm="HS256")
+        return Response({"access_token": token, "token_type": "bearer", "expires_in": lifetime_s})
+
+
+class OrgViewSet(viewsets.ViewSet):
+    """Schlankes Tenant-Profil basierend auf aktueller Org (aus Session/JWT/Host)."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def _resolve_tenant(self, request):
+        hint = getattr(request, "tenant_hint", None)
+        from core.models import Tenant, OParlSource
+        t = None
+        if hint:
+            t = Tenant.objects.filter(domain=hint).first() or Tenant.objects.filter(slug=hint).first()
+        if not t and getattr(request, "user", None):
+            t = getattr(request.user, "tenant", None)
+        return t
+
+    def _serialize(self, tenant):
+        from core.models import OParlSource
+        sources = list(OParlSource.objects.filter(tenant=tenant).values("id", "root_url", "enabled", "last_synced_at"))
+        return {
+            "id": tenant.id,
+            "name": tenant.name,
+            "slug": tenant.slug,
+            "domain": tenant.domain,
+            "logo_url": tenant.logo_url,
+            "color_primary": tenant.color_primary,
+            "color_secondary": tenant.color_secondary,
+            "mfa_required_for_admins": tenant.mfa_required_for_admins,
+            "region": tenant.region,
+            "oparl_sources": sources,
+            "ai_limits": {},
+        }
+
+    def list(self, request):
+        tenant = self._resolve_tenant(request)
+        if not tenant:
+            return Response({"detail": "Tenant nicht gefunden"}, status=404)
+        return Response(self._serialize(tenant))
+
+    def partial_update(self, request, pk=None):
+        tenant = self._resolve_tenant(request)
+        if not tenant:
+            return Response({"detail": "Tenant nicht gefunden"}, status=404)
+        # Nur bestimmte Felder erlauben
+        allowed = {"name", "logo_url", "color_primary", "color_secondary", "domain", "region", "mfa_required_for_admins"}
+        updates = {k: v for k, v in request.data.items() if k in allowed}
+        if updates:
+            for k, v in updates.items():
+                setattr(tenant, k, v)
+            tenant.save(update_fields=list(updates.keys()))
+            try:
+                AuditLog.objects.create(org=tenant, actor=getattr(request, "user", None), action="org.updated", target_type="tenant", target_id=str(tenant.id), diff_json=updates)
+            except Exception:
+                pass
+        return Response(self._serialize(tenant))
 
 	@action(detail=False, methods=["post"], url_path="accept-invite")
 	def accept_invite(self, request):

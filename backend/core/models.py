@@ -378,6 +378,26 @@ class ApiKey(models.Model):
 		return self.hashed_key == hashlib.sha256(plain_key.encode("utf-8")).hexdigest()
 
 
+class OAuthClient(models.Model):
+	"""OAuth Client Credentials für service-to-service Auth, org-gescoped."""
+	org = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="oauth_clients")
+	name = models.CharField(max_length=100)
+	client_id = models.CharField(max_length=64, unique=True)
+	client_secret_hashed = models.CharField(max_length=128)
+	scopes = models.JSONField(default=list, blank=True)
+	is_active = models.BooleanField(default=True)
+	created_at = models.DateTimeField(auto_now_add=True)
+	last_used_at = models.DateTimeField(null=True, blank=True)
+
+	def set_plain_secret(self, plain_secret: str):
+		import hashlib
+		self.client_secret_hashed = hashlib.sha256(plain_secret.encode("utf-8")).hexdigest()
+
+	def check_secret(self, plain_secret: str) -> bool:
+		import hashlib
+		return self.client_secret_hashed == hashlib.sha256(plain_secret.encode("utf-8")).hexdigest()
+
+
 class PricingAgreement(models.Model):
 	"""Preisvereinbarung pro Mandant (Stadt) oder optional pro Subspace (Fraktion)."""
 	org = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="pricing_agreements")
@@ -425,6 +445,31 @@ class StaffProfile(models.Model):
 	department = models.CharField(max_length=30, default="sales")  # admin, sales, support, engineering
 	scopes = models.JSONField(default=list, blank=True)
 	can_create_test_env = models.BooleanField(default=True)
+
+
+class Role(models.Model):
+	"""Rolle pro Organisation (Mandant), z. B. owner, admin, editor, viewer."""
+	org = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="roles")
+	slug = models.SlugField()
+	name = models.CharField(max_length=100)
+	description = models.TextField(blank=True, default="")
+	permissions = models.JSONField(default=list, blank=True)
+
+	class Meta:
+		unique_together = ("org", "slug")
+
+	def __str__(self) -> str:
+		return f"{self.org.slug}:{self.slug}"
+
+
+class UserRole(models.Model):
+	"""Zuweisung User↔Role (org-scoped)."""
+	org = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="user_roles")
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_roles")
+	role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name="user_roles")
+
+	class Meta:
+		unique_together = ("org", "user", "role")
 
 
 class OfferDraft(models.Model):

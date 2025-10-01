@@ -83,6 +83,7 @@ REST_FRAMEWORK = {
 		"django_filters.rest_framework.DjangoFilterBackend",
 	],
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "core.auth.JWTAuthentication",
         "core.auth.CsrfExemptSessionAuthentication",
     ],
 	"DEFAULT_PERMISSION_CLASSES": [

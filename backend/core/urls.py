@@ -8,6 +8,7 @@ from .views import (
 	CommitteeViewSet,
 	DocumentViewSet,
 	ApiKeyViewSet,
+    OAuthClientViewSet,
 	LeadViewSet,
 	MeetingViewSet,
 	MotionViewSet,
@@ -15,6 +16,8 @@ from .views import (
 	OrganizationViewSet,
 	PersonViewSet,
 	RoleAssignmentViewSet,
+    RoleViewSet,
+    UserRoleViewSet,
 	ShareLinkViewSet,
     TeamMembershipViewSet,
     TeamViewSet,
@@ -33,10 +36,13 @@ from .views import (
 	OfferDraftViewSet,
 	UserViewSet,
 	TenantViewSet,
+    OrgViewSet,
     OrgsAdminViewSet,
     OParlBodiesViewSet,
     OParlMeetingsViewSet,
     OParlPapersViewSet,
+    SearchViewSet,
+    AiViewSet,
 )
 
 router = DefaultRouter()
@@ -54,6 +60,7 @@ router.register(r"workflow-configs", WorkflowConfigViewSet)
 router.register(r"audit-logs", AuditLogViewSet, basename="audit-logs")
 router.register(r"webhooks", WebhookEndpointViewSet)
 router.register(r"api-keys", ApiKeyViewSet)
+router.register(r"oauth-clients", OAuthClientViewSet)
 router.register(r"committees", CommitteeViewSet)
 router.register(r"persons", PersonViewSet)
 router.register(r"organizations", OrganizationViewSet)
@@ -66,11 +73,18 @@ router.register(r"share-links", ShareLinkViewSet)
 router.register(r"teams", TeamViewSet)
 router.register(r"team-memberships", TeamMembershipViewSet)
 router.register(r"oparl-sources", OParlSourceViewSet)
+# kompatibler Alias
+router.register(r"connectors/oparl", OParlSourceViewSet, basename="connectors-oparl")
 router.register(r"role-assignments", RoleAssignmentViewSet)
+router.register(r"roles", RoleViewSet)
+router.register(r"user-roles", UserRoleViewSet)
 router.register(r"users", UserViewSet)
 router.register(r"memberships", MembershipViewSet, basename="memberships")
 router.register(r"staff", StaffProfileViewSet)
 router.register(r"offer-drafts", OfferDraftViewSet)
+router.register(r"org", OrgViewSet, basename="org")
+router.register(r"search", SearchViewSet, basename="search")
+router.register(r"ai", AiViewSet, basename="ai")
 
 admin_router.register(r"orgs", OrgsAdminViewSet, basename="admin-orgs")
 admin_router.register(r"plans", PlanViewSet, basename="admin-plans")
@@ -82,6 +96,7 @@ admin_router.register(r"workflow-configs", WorkflowConfigViewSet, basename="admi
 admin_router.register(r"audit-logs", AuditLogViewSet, basename="admin-audit-logs")
 admin_router.register(r"webhooks", WebhookEndpointViewSet, basename="admin-webhooks")
 admin_router.register(r"api-keys", ApiKeyViewSet, basename="admin-api-keys")
+admin_router.register(r"oauth-clients", OAuthClientViewSet, basename="admin-oauth-clients")
 
 urlpatterns = [
 	path("", include(router.urls)),

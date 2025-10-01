@@ -27,11 +27,14 @@ from .models import (
     AuditLog,
     WebhookEndpoint,
     ApiKey,
+    OAuthClient,
     PricingAgreement,
     Membership,
     Invitation,
     StaffProfile,
     OfferDraft,
+    Role,
+    UserRole,
 )
 
 
@@ -283,6 +286,38 @@ class ApiKeySerializer(serializers.ModelSerializer):
 		return instance
 
 
+class OAuthClientSerializer(serializers.ModelSerializer):
+	plain_secret = serializers.CharField(write_only=True, required=False)
+
+	class Meta:
+		model = OAuthClient
+		fields = [
+			"id",
+			"org",
+			"name",
+			"client_id",
+			"client_secret_hashed",
+			"scopes",
+			"is_active",
+			"created_at",
+			"last_used_at",
+			"plain_secret",
+		]
+		read_only_fields = ["client_secret_hashed", "created_at", "last_used_at"]
+
+	def create(self, validated_data):
+		plain = validated_data.pop("plain_secret", None)
+		from uuid import uuid4
+		if not validated_data.get("client_id"):
+			validated_data["client_id"] = uuid4().hex
+		instance: OAuthClient = OAuthClient(**validated_data)
+		if plain:
+			instance.set_plain_secret(plain)
+		instance.save()
+		instance.plain_secret = plain  # type: ignore[attr-defined]
+		return instance
+
+
 class PricingAgreementSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = PricingAgreement
@@ -359,4 +394,16 @@ class OfferDraftSerializer(serializers.ModelSerializer):
 			"updated_at",
 		]
 		read_only_fields = ["created_by", "created_at", "updated_at"]
+
+
+class RoleSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Role
+		fields = ["id", "org", "slug", "name", "description", "permissions"]
+
+
+class UserRoleSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = UserRole
+		fields = ["id", "org", "user", "role"]
 
