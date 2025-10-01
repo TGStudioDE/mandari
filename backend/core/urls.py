@@ -34,6 +34,8 @@ from .views import (
 	MembershipViewSet,
 	StaffProfileViewSet,
 	OfferDraftViewSet,
+    DraftViewSet,
+    SharePublicViewSet,
 	UserViewSet,
 	TenantViewSet,
     OrgViewSet,
@@ -82,6 +84,7 @@ router.register(r"users", UserViewSet)
 router.register(r"memberships", MembershipViewSet, basename="memberships")
 router.register(r"staff", StaffProfileViewSet)
 router.register(r"offer-drafts", OfferDraftViewSet)
+router.register(r"drafts", DraftViewSet)
 router.register(r"org", OrgViewSet, basename="org")
 router.register(r"search", SearchViewSet, basename="search")
 router.register(r"ai", AiViewSet, basename="ai")
@@ -104,6 +107,7 @@ urlpatterns = [
     path("oparl/bodies", OParlBodiesViewSet.as_view({'get': 'list'}), name="oparl-bodies"),
     path("oparl/meetings", OParlMeetingsViewSet.as_view({'get': 'list'}), name="oparl-meetings"),
     path("oparl/papers", OParlPapersViewSet.as_view({'get': 'list'}), name="oparl-papers"),
+    path("share/<str:token>", SharePublicViewSet.as_view({'get': 'open'}), name="share-open"),
     path(
         "calendar/tenant/<int:tenant_id>.ics",
         lambda request, tenant_id: HttpResponse(

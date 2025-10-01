@@ -33,6 +33,8 @@ from .models import (
     Invitation,
     StaffProfile,
     OfferDraft,
+    Draft,
+    ShareTokenLog,
     Role,
     UserRole,
 )
@@ -394,6 +396,20 @@ class OfferDraftSerializer(serializers.ModelSerializer):
 			"updated_at",
 		]
 		read_only_fields = ["created_by", "created_at", "updated_at"]
+
+
+class DraftSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Draft
+		fields = ["id", "org", "owner", "title", "content", "status", "version", "created_at", "updated_at"]
+		read_only_fields = ["owner", "created_at", "updated_at"]
+
+
+class ShareTokenLogSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = ShareTokenLog
+		fields = ["id", "jti", "draft", "org", "scope", "expires_at", "created_by", "created_at"]
+		read_only_fields = ["created_at"]
 
 
 class RoleSerializer(serializers.ModelSerializer):

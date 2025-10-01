@@ -72,6 +72,8 @@ from .serializers import (
     InvitationSerializer,
     StaffProfileSerializer,
     OfferDraftSerializer,
+    DraftSerializer,
+    ShareTokenLogSerializer,
     RoleSerializer,
     UserRoleSerializer,
 )
@@ -628,6 +630,80 @@ class OfferDraftViewSet(viewsets.ModelViewSet):
         AuditLog.objects.create(org=tenant, actor=request.user if request.user.is_authenticated else None, action="org.test_created", target_type="tenant", target_id=str(tenant.id), diff_json={"slug": slug})
         return Response(TenantSerializer(tenant).data, status=201)
 
+
+class DraftViewSet(viewsets.ModelViewSet):
+    queryset = __import__("core.models", fromlist=["Draft"]).Draft.objects.all().select_related("org", "owner")
+    serializer_class = DraftSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=getattr(self.request, "user", None))
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = getattr(self.request, "user", None)
+        if not getattr(user, "is_superuser", False) and getattr(user, "tenant_id", None):
+            qs = qs.filter(org_id=user.tenant_id)
+        return qs
+
+    @action(detail=True, methods=["post"], url_path="share")
+    def share(self, request, pk=None):
+        import os, jwt, uuid
+        from datetime import datetime, timedelta, timezone
+        draft = self.get_object()
+        scope = request.data.get("scope", "view")
+        hours = int(request.data.get("hours", 24))
+        now = datetime.now(tz=timezone.utc)
+        exp = now + timedelta(hours=hours)
+        jti = uuid.uuid4().hex
+        payload = {
+            "aud": "share",
+            "sub": f"draft:{draft.id}",
+            "org_id": draft.org_id,
+            "scope": scope,
+            "exp": int(exp.timestamp()),
+            "jti": jti,
+        }
+        secret = os.getenv("JWT_SECRET", os.getenv("DJANGO_SECRET_KEY", "insecure"))
+        token = jwt.encode(payload, secret, algorithm="HS256")
+        from core.models import ShareTokenLog
+        ShareTokenLog.objects.create(jti=jti, draft=draft, org_id=draft.org_id, scope=scope, expires_at=exp, created_by=getattr(request, "user", None))
+        try:
+            AuditLog.objects.create(org=draft.org, actor=getattr(request, "user", None), action="draft.shared", target_type="draft", target_id=str(draft.id), diff_json={"scope": scope})
+        except Exception:
+            pass
+        return Response({"share_token": token, "expires_at": exp.isoformat()})
+
+    @action(detail=True, methods=["post"], url_path="export")
+    def export(self, request, pk=None):
+        draft = self.get_object()
+        # Placeholder Export: liefere JSON zurück (Produktionscode würde PDF/DOCX erzeugen)
+        return Response({"title": draft.title, "content": draft.content, "status": draft.status, "version": draft.version})
+
+
+class SharePublicViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
+
+    @action(detail=False, methods=["get"], url_path="(?P<token>[^/]+)")
+    def open(self, request, token=None):
+        import os, jwt
+        from jwt import InvalidTokenError
+        secret = os.getenv("JWT_SECRET", os.getenv("DJANGO_SECRET_KEY", "insecure"))
+        try:
+            payload = jwt.decode(token, secret, algorithms=["HS256"], audience="share")
+        except Exception as e:
+            return Response({"detail": "Ungültiger Token"}, status=400)
+        sub = payload.get("sub", "")
+        if not sub.startswith("draft:"):
+            return Response({"detail": "Ungültiger Token"}, status=400)
+        draft_id = int(sub.split(":", 1)[1])
+        from core.models import Draft
+        draft = Draft.objects.filter(id=draft_id).first()
+        if not draft:
+            return Response({"detail": "Nicht gefunden"}, status=404)
+        data = {"id": draft.id, "title": draft.title, "content": draft.content, "status": draft.status, "version": draft.version}
+        return Response({"draft": data, "scope": payload.get("scope")})
+
 class OrgsAdminViewSet(viewsets.ModelViewSet):
     """Admin-spezifische Endpunkte für Organisationen (Mandanten)."""
     queryset = Tenant.objects.all()
@@ -1034,154 +1110,6 @@ class OrgViewSet(viewsets.ViewSet):
                 pass
         return Response(self._serialize(tenant))
 
-	@action(detail=False, methods=["post"], url_path="accept-invite")
-	def accept_invite(self, request):
-		"""Invite mittels Token akzeptieren: erstellt Membership und optional SpaceMemberships."""
-		token = request.data.get("token")
-		username = request.data.get("username")
-		password = request.data.get("password")
-		if not token or not username or not password:
-			return Response({"detail": "token, username, password erforderlich"}, status=400)
-		inv = Invitation.objects.filter(token=token).first()
-		if not inv:
-			return Response({"detail": "Ungültige Einladung"}, status=404)
-		from django.utils import timezone
-		if inv.expires_at and inv.expires_at < timezone.now():
-			return Response({"detail": "Einladung abgelaufen"}, status=400)
-		UserModel = get_user_model()
-		user = UserModel.objects.filter(username=username).first()
-		if user is None:
-			user = UserModel.objects.create_user(username=username, password=password, email=inv.email, tenant=inv.org)
-		# Org membership
-		Membership.objects.update_or_create(org=inv.org, user=user, defaults={"role": inv.role})
-		# Space roles
-		for item in (inv.subspace_roles or []):
-			sub_id = item.get("subspace_id")
-			role = item.get("role") or "member"
-			if sub_id:
-				SpaceMembership.objects.update_or_create(subspace_id=sub_id, user=user, defaults={"role": role})
-		inv.accepted_at = timezone.now()
-		inv.save(update_fields=["accepted_at"])
-		inv.delete()
-		return Response({"detail": "Einladung akzeptiert"})
-
-	@action(detail=False, methods=["post"], url_path="logout")
-	def logout_view(self, request):
-		logout(request)
-		return Response({"detail": "Ausgeloggt"})
-
-	@action(detail=False, methods=["get"], url_path="me", permission_classes=[permissions.IsAuthenticated])
-	def me(self, request):
-		user = request.user
-		return Response({
-			"id": user.id,
-			"username": user.username,
-			"tenant": getattr(user, "tenant_id", None),
-			"role": getattr(user, "role", None),
-			"is_staff": user.is_staff,
-			"is_superuser": user.is_superuser,
-			"mfa_enabled": getattr(user, "mfa_enabled", False),
-		})
-
-	@action(detail=False, methods=["post"], url_path="password-reset-request")
-	def password_reset_request(self, request):
-		serializer = PasswordResetRequestSerializer(data=request.data)
-		serializer.is_valid(raise_exception=True)
-		email = serializer.validated_data["email"]
-		user = UserModel.objects.filter(email=email).first()
-		# Immer 200 antworten (Datensparsamkeit), Token nur erzeugen wenn User existiert
-		if user:
-			from django.utils import timezone
-			token_obj = PasswordResetToken.objects.create(
-				user=user,
-				expires_at=timezone.now() + timezone.timedelta(hours=1),
-			)
-			# Mail versenden
-			try:
-				from django.core.mail import send_mail
-				from django.conf import settings
-				frontend_base = getattr(settings, "FRONTEND_BASE_URL", "http://localhost:5174")
-				url = f"{frontend_base}/reset?token={token_obj.token}"
-				send_mail(
-					"Passwort zurücksetzen",
-					f"Sie können Ihr Passwort hier zurücksetzen: {url}",
-					getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@mandari.local"),
-					[email],
-				)
-			except Exception:
-				pass
-		return Response({"detail": "Wenn die E-Mail existiert, wurde ein Link versendet."})
-
-	@action(detail=False, methods=["post"], url_path="password-reset-confirm")
-	def password_reset_confirm(self, request):
-		serializer = PasswordResetConfirmSerializer(data=request.data)
-		serializer.is_valid(raise_exception=True)
-		token = serializer.validated_data["token"]
-		new_password = serializer.validated_data["new_password"]
-		from django.utils import timezone
-		token_obj = PasswordResetToken.objects.filter(token=token).select_related("user").first()
-		if not token_obj or not token_obj.is_valid:
-			return Response({"detail": "Ungültiger oder abgelaufener Token."}, status=400)
-		user = token_obj.user
-		user.set_password(new_password)
-		user.save(update_fields=["password"])
-		token_obj.used_at = timezone.now()
-		token_obj.save(update_fields=["used_at"])
-		return Response({"detail": "Passwort aktualisiert."})
-
-	@action(detail=False, methods=["post"], url_path="mfa/setup", permission_classes=[permissions.IsAuthenticated])
-	def mfa_setup(self, request):
-		"""Erzeugt Base32-TOTP-Secret, otpauth-URL und Recovery-Codes."""
-		import secrets, base64, urllib.parse
-		user = request.user
-		secret_bytes = secrets.token_bytes(10)
-		secret = base64.b32encode(secret_bytes).decode("utf-8").rstrip("=")
-		recovery = [secrets.token_hex(4) for _ in range(8)]
-		user.mfa_secret = secret
-		user.mfa_recovery_codes = recovery
-		user.save(update_fields=["mfa_secret", "mfa_recovery_codes"])
-		issuer = urllib.parse.quote("Mandari")
-		account = urllib.parse.quote(getattr(user, "username", "user"))
-		otpauth = f"otpauth://totp/{issuer}:{account}?secret={secret}&issuer={issuer}&digits=6&period=30"
-		return Response({"secret": secret, "recovery_codes": recovery, "otpauth_url": otpauth})
-
-	@action(detail=False, methods=["post"], url_path="mfa/enable", permission_classes=[permissions.IsAuthenticated])
-	def mfa_enable(self, request):
-		user = request.user
-		otp = request.data.get("otp")
-		if not user.mfa_secret or not otp or not self._verify_totp(user.mfa_secret, str(otp)):
-			return Response({"detail": "TOTP ungültig"}, status=400)
-		user.mfa_enabled = True
-		user.save(update_fields=["mfa_enabled"])
-		return Response({"detail": "MFA aktiviert"})
-
-	@action(detail=False, methods=["post"], url_path="mfa/disable", permission_classes=[permissions.IsAuthenticated])
-	def mfa_disable(self, request):
-		user = request.user
-		user.mfa_enabled = False
-		user.mfa_secret = ""
-		user.mfa_recovery_codes = []
-		user.save(update_fields=["mfa_enabled", "mfa_secret", "mfa_recovery_codes"])
-		return Response({"detail": "MFA deaktiviert"})
-
-	@action(detail=False, methods=["post"], url_path="mfa/verify", permission_classes=[permissions.IsAuthenticated])
-	def mfa_verify(self, request):
-		user = request.user
-		otp = request.data.get("otp")
-		recovery = request.data.get("recovery_code")
-		from django.utils import timezone
-		if otp and self._verify_totp(getattr(user, "mfa_secret", ""), str(otp)):
-			user.mfa_last_verified_at = timezone.now()
-			user.save(update_fields=["mfa_last_verified_at"])
-			return Response({"detail": "OK"})
-		if recovery and recovery in (getattr(user, "mfa_recovery_codes", []) or []):
-			codes = list(getattr(user, "mfa_recovery_codes", []) or [])
-			codes.remove(recovery)
-			user.mfa_recovery_codes = codes
-			user.mfa_last_verified_at = timezone.now()
-			user.save(update_fields=["mfa_recovery_codes", "mfa_last_verified_at"])
-			return Response({"detail": "OK"})
-		return Response({"detail": "Ungültig"}, status=400)
 
 
 # ==========================
