@@ -1,8 +1,36 @@
 openapi: 3.0.3
 info:
   title: Mandari API (MVP)
-  version: 0.1.0
+  version: 0.1.1
 paths:
+  /-/health:
+    get:
+      summary: Health Check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  app:
+                    type: string
+              example:
+                status: ok
+                app: mandari
+  /-/metrics:
+    get:
+      summary: Prometheus Metrics
+      responses:
+        '200':
+          description: Metrics
+          content:
+            text/plain:
+              schema:
+                type: string
   /api/tenants/:
     get:
       summary: List tenants

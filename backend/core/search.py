@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from opensearchpy import OpenSearch
 
@@ -16,20 +16,36 @@ def get_client() -> OpenSearch:
 	)
 
 
+def _org_index_name(base: str, org_id: Optional[int]) -> str:
+    if org_id is None:
+        return base
+    return f"{org_id}-{base}"
+
+
 def index_document(doc: Dict[str, Any]) -> None:
 	client = get_client()
-	index_name = os.getenv("OPENSEARCH_INDEX", "mandari-documents")
+	base_index = os.getenv("OPENSEARCH_INDEX", "mandari-documents")
+	org_id = doc.get("tenant_id") or doc.get("org_id")
+	index_name = _org_index_name(base_index, org_id)
 	client.indices.create(index=index_name, ignore=400, body={
 		"settings": {
 			"index": {
-				"knn": True
+				"knn": True,
+				"analysis": {
+					"analyzer": {
+						"german_custom": {
+							"type": "german"
+						}
+					}
+				}
 			}
 		},
 		"mappings": {
 			"properties": {
 				"tenant_id": {"type": "keyword"},
-				"title": {"type": "text"},
-				"content_text": {"type": "text"},
+				"title": {"type": "text", "analyzer": "german_custom"},
+				"content_text": {"type": "text", "analyzer": "german_custom"},
+				"title_suggest": {"type": "completion"},
 			}
 		}
 	})
