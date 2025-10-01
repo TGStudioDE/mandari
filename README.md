@@ -1,3 +1,25 @@
+## Frontends (SaaS Dashboards)
+
+Dieses Repo enthält zusätzlich zu `website/` zwei eigenständige Frontends, die nicht im Website-Container laufen:
+
+- `frontends/admin`: System-Admin-Dashboard
+- `frontends/dashboard`: Kunden-Dashboard
+
+Beide Frontends laufen separat (Vite, React, TS) und sprechen per Cookie-Auth mit dem Django-Backend (`/api`). Multi-Tenancy erfolgt per `X-Tenant` Header oder `?tenant=` Query.
+
+Start (Dev):
+
+1. `docker compose up -d backend postgres memcached opensearch rabbitmq minio create-bucket`
+2. In separaten Terminals je Frontend:
+
+   - Admin: `docker compose up admin-frontend`
+   - Kunden: `docker compose up dashboard-frontend`
+
+Konfiguration (Umgebung):
+
+- Backend setzt `CORS_ALLOWED_ORIGINS` und `CSRF_TRUSTED_ORIGINS` bereits für die Ports 5173/5174.
+- Frontends nutzen `VITE_API_BASE=http://localhost:8000`.
+
 Mandari – Ratsarbeitssystem
 
 Ziel

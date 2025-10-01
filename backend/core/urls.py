@@ -7,6 +7,7 @@ from .views import (
 	AuthViewSet,
 	CommitteeViewSet,
 	DocumentViewSet,
+	ApiKeyViewSet,
 	LeadViewSet,
 	MeetingViewSet,
 	MotionViewSet,
@@ -17,13 +18,42 @@ from .views import (
 	ShareLinkViewSet,
     TeamMembershipViewSet,
     TeamViewSet,
+	SubspaceViewSet,
+	SpaceMembershipViewSet,
+	PlanViewSet,
+	SubscriptionViewSet,
+	UsageMeterViewSet,
+	FeatureFlagViewSet,
+	NoteViewSet,
+	WorkflowConfigViewSet,
+	AuditLogViewSet,
+	WebhookEndpointViewSet,
+	MembershipViewSet,
+	StaffProfileViewSet,
+	OfferDraftViewSet,
 	UserViewSet,
 	TenantViewSet,
+    OrgsAdminViewSet,
+    OParlBodiesViewSet,
+    OParlMeetingsViewSet,
+    OParlPapersViewSet,
 )
 
 router = DefaultRouter()
+admin_router = DefaultRouter()
 router.register(r"tenants", TenantViewSet)
 router.register(r"auth", AuthViewSet, basename="auth")
+router.register(r"subspaces", SubspaceViewSet)
+router.register(r"space-memberships", SpaceMembershipViewSet)
+router.register(r"plans", PlanViewSet)
+router.register(r"subscriptions", SubscriptionViewSet)
+router.register(r"usage", UsageMeterViewSet, basename="usage")
+router.register(r"feature-flags", FeatureFlagViewSet)
+router.register(r"notes", NoteViewSet)
+router.register(r"workflow-configs", WorkflowConfigViewSet)
+router.register(r"audit-logs", AuditLogViewSet, basename="audit-logs")
+router.register(r"webhooks", WebhookEndpointViewSet)
+router.register(r"api-keys", ApiKeyViewSet)
 router.register(r"committees", CommitteeViewSet)
 router.register(r"persons", PersonViewSet)
 router.register(r"organizations", OrganizationViewSet)
@@ -38,9 +68,27 @@ router.register(r"team-memberships", TeamMembershipViewSet)
 router.register(r"oparl-sources", OParlSourceViewSet)
 router.register(r"role-assignments", RoleAssignmentViewSet)
 router.register(r"users", UserViewSet)
+router.register(r"memberships", MembershipViewSet, basename="memberships")
+router.register(r"staff", StaffProfileViewSet)
+router.register(r"offer-drafts", OfferDraftViewSet)
+
+admin_router.register(r"orgs", OrgsAdminViewSet, basename="admin-orgs")
+admin_router.register(r"plans", PlanViewSet, basename="admin-plans")
+admin_router.register(r"subscriptions", SubscriptionViewSet, basename="admin-subscriptions")
+admin_router.register(r"usage", UsageMeterViewSet, basename="admin-usage")
+admin_router.register(r"feature-flags", FeatureFlagViewSet, basename="admin-feature-flags")
+admin_router.register(r"notes", NoteViewSet, basename="admin-notes")
+admin_router.register(r"workflow-configs", WorkflowConfigViewSet, basename="admin-workflow-configs")
+admin_router.register(r"audit-logs", AuditLogViewSet, basename="admin-audit-logs")
+admin_router.register(r"webhooks", WebhookEndpointViewSet, basename="admin-webhooks")
+admin_router.register(r"api-keys", ApiKeyViewSet, basename="admin-api-keys")
 
 urlpatterns = [
 	path("", include(router.urls)),
+    path("admin/", include(admin_router.urls)),
+    path("oparl/bodies", OParlBodiesViewSet.as_view({'get': 'list'}), name="oparl-bodies"),
+    path("oparl/meetings", OParlMeetingsViewSet.as_view({'get': 'list'}), name="oparl-meetings"),
+    path("oparl/papers", OParlPapersViewSet.as_view({'get': 'list'}), name="oparl-papers"),
     path(
         "calendar/tenant/<int:tenant_id>.ics",
         lambda request, tenant_id: HttpResponse(

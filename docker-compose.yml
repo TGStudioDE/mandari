@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgres:16
@@ -67,9 +65,9 @@ services:
       - minio
     entrypoint: ["/bin/sh","-c"]
     command: >
-      "mc alias set local http://minio:9000 ${S3_ACCESS_KEY} ${S3_SECRET_KEY} &&
+      mc alias set local http://minio:9000 ${S3_ACCESS_KEY} ${S3_SECRET_KEY} &&
       mc mb -p local/${S3_BUCKET} || true &&
-      mc anonymous set download local/${S3_BUCKET} || true"
+      mc anonymous set download local/${S3_BUCKET} || true
 
   backend:
     build:
@@ -77,8 +75,12 @@ services:
     env_file: .env
     command: bash -lc "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     environment:
+      POSTGRES_HOST: "postgres"
+      MEMCACHED_HOST: "memcached"
+      S3_ENDPOINT_URL: "http://minio:9000"
       FRONTEND_BASE_URL: "http://localhost:4321"
-      CORS_ALLOWED_ORIGINS: "http://localhost:4321,http://website:4321"
+      CORS_ALLOWED_ORIGINS: "http://localhost:4321,http://website:4321,http://localhost:5173,http://localhost:5174,http://admin-frontend:5173,http://dashboard-frontend:5174"
+      CSRF_TRUSTED_ORIGINS: "http://localhost:4321,http://website:4321,http://localhost:5173,http://localhost:5174,http://admin-frontend:5173,http://dashboard-frontend:5174"
     volumes:
       - ./backend:/app
       - ./docs:/app/docs
@@ -125,6 +127,36 @@ services:
       - ./website:/site
     ports:
       - "4321:4321"
+    depends_on:
+      - backend
+
+  admin-frontend:
+    image: node:20
+    working_dir: /site
+    env_file: .env
+    command: bash -lc "npm install && npm run dev"
+    environment:
+      - PORT=5173
+      - BACKEND_INTERNAL_URL=http://backend:8000
+    volumes:
+      - ./frontends/admin:/site
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  dashboard-frontend:
+    image: node:20
+    working_dir: /site
+    env_file: .env
+    command: bash -lc "npm install && npm run dev"
+    environment:
+      - PORT=5174
+      - BACKEND_INTERNAL_URL=http://backend:8000
+    volumes:
+      - ./frontends/dashboard:/site
+    ports:
+      - "5174:5174"
     depends_on:
       - backend
 

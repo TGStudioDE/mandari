@@ -82,9 +82,9 @@ REST_FRAMEWORK = {
 	"DEFAULT_FILTER_BACKENDS": [
 		"django_filters.rest_framework.DjangoFilterBackend",
 	],
-	"DEFAULT_AUTHENTICATION_CLASSES": [
-		"rest_framework.authentication.SessionAuthentication",
-	],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "core.auth.CsrfExemptSessionAuthentication",
+    ],
 	"DEFAULT_PERMISSION_CLASSES": [
 		"rest_framework.permissions.IsAuthenticatedOrReadOnly",
 	],
@@ -136,7 +136,7 @@ if not CORS_ALLOWED_ORIGINS and DEBUG:
 	CORS_ALLOW_ALL_ORIGINS = True
 else:
 	CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_CREDENTIALS = os.getenv("CORS_ALLOW_CREDENTIALS", "True") == "True"
 
 # Cookies/CSRF
 CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o]

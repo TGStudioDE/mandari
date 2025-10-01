@@ -4,7 +4,8 @@ from django.http import HttpResponseRedirect
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 def redirect_to_frontend(request):
-	return HttpResponseRedirect("http://localhost:4321/")
+    # Standard auf Website leiten; Admin-/Kunden-Dashboards laufen unabhängig.
+    return HttpResponseRedirect("http://localhost:4321/")
 
 urlpatterns = [
 	path("", redirect_to_frontend, name="home"),

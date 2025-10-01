@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+
+:root {
+  --brand-primary: #0a75ff;
+  --brand-secondary: #0f172a;
+}
+
+.bg-brand { background-color: var(--brand-primary); }
+.text-brand { color: var(--brand-primary); }
+.border-brand { border-color: var(--brand-primary); }
+
+
